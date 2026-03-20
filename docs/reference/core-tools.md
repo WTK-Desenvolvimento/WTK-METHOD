@@ -5,7 +5,7 @@ sidebar:
   order: 2
 ---
 
-Every Wtk installation includes a set of core skills that can be used in conjunction with any anything you are doing — standalone tasks and workflows that work across all projects, all modules, and all phases. These are always available regardless of which optional modules you install.
+Every Wtk installation includes a set of core skills that can be used in conjunction with anything you are doing — standalone tasks and workflows that work across all projects, all modules, and all phases. These are always available regardless of which optional modules you install.
 
 :::tip[Quick Path]
 Run any core tool by typing its skill name (e.g., `wtk-help`) in your IDE. No agent session required.
@@ -26,6 +26,12 @@ Run any core tool by typing its skill name (e.g., `wtk-help`) in your IDE. No ag
 | [`wtk-editorial-review-structure`](#wtk-editorial-review-structure) | Task | Structural editing — cuts, merges, and reorganization |
 | [`wtk-shard-doc`](#wtk-shard-doc) | Task | Split large markdown files into organized sections |
 | [`wtk-index-docs`](#wtk-index-docs) | Task | Generate or update an index of all docs in a folder |
+| [`wtk-n8n-master`](#wtk-n8n-master) | Task | Discover self-hosted n8n via MCP and write environment spec |
+| [`wtk-n8n-studio`](#wtk-n8n-studio) | Task | Route n8n work using the environment spec |
+| [`wtk-n8n-workflows`](#wtk-n8n-workflows) | Task | Design and tune n8n workflow graphs |
+| [`wtk-n8n-integrations`](#wtk-n8n-integrations) | Task | Plan HTTP, webhooks, OAuth, and credential usage |
+| [`wtk-n8n-operations`](#wtk-n8n-operations) | Task | Queue mode, workers, logs, metrics, hosting |
+| [`wtk-n8n-dev-story`](#wtk-n8n-dev-story) | Workflow | Author a workflow story before building in n8n |
 
 ## wtk-help
 
@@ -291,3 +297,82 @@ Run both `wtk-review-adversarial-general` and `wtk-review-edge-case-hunter` toge
 **Input:** Target folder path
 
 **Output:** `index.md` with organized file listings, relative links, and brief descriptions
+
+## wtk-n8n-master
+
+**Capture facts about your n8n deployment.** — Uses an n8n MCP server when available (or a manual checklist) to record version, extensions, execution mode, and self-hosted topology into a single markdown spec.
+
+**Use it when:**
+
+- You are starting n8n automation work and need a canonical environment document
+- Community nodes or queue mode matter for downstream design
+- You want MCP-driven discovery instead of ad-hoc assumptions
+
+**How it works:**
+
+1. Confirms MCP availability or falls back to structured questions
+2. Invokes the `agents/n8n-environment-master` instructions to probe the instance safely (no secret values)
+3. Fills `resources/environment-spec-template.md` and saves `{output_folder}/n8n/n8n-environment-spec.md`
+
+**Output:** `n8n-environment-spec.md`
+
+## wtk-n8n-studio
+
+**Single entry point for n8n sessions.** — Reads the environment spec and points you to the right specialized n8n skill.
+
+**Use it when:**
+
+- You have (or will soon have) an environment spec and need orientation
+- You are unsure whether the next step is workflow design, integrations, or ops
+
+**Output:** Chat guidance; optional `{output_folder}/n8n/session-notes-*.md`
+
+## wtk-n8n-workflows
+
+**Workflow graph design and performance for self-hosted n8n.** — Data flow, errors, idempotency, batching, and queue-aware patterns.
+
+**Use it when:**
+
+- Designing a new workflow or refactoring an existing graph
+- Diagnosing slow or flaky node sequences
+
+**Output:** Chat guidance
+
+## wtk-n8n-integrations
+
+**External connectivity and auth patterns.** — HTTP Request, webhooks, OAuth2, credential types, rate limits — without exposing secrets.
+
+**Use it when:**
+
+- Connecting n8n to APIs or SaaS products
+- Debugging auth or webhook verification
+
+**Output:** Chat guidance
+
+## wtk-n8n-operations
+
+**Run and observe self-hosted n8n.** — Docker/Kubernetes notes, queue mode and workers, logs, metrics, upgrades, backups.
+
+**Use it when:**
+
+- Scaling workers or enabling queue mode
+- Reading logs and metrics to explain stuck or failed executions
+
+**Output:** Chat guidance
+
+## wtk-n8n-dev-story
+
+**Structured workflow story before you click nodes.** — Produces a markdown spec with triggers, data contracts, acceptance criteria, and a manual test plan.
+
+**Use it when:**
+
+- You want a build-ready story (invoke the skill `wtk-n8n-dev-story`; some IDEs surface this as `/wtk-n8n-dev-story`)
+- Hand-off between “what we need” and “implementation in the editor” must be explicit
+
+**How it works:**
+
+1. Loads core config and optionally `n8n-environment-spec.md`
+2. Follows `./workflow.md` and `./template-n8n-workflow-story.md`
+3. Writes `{output_folder}/n8n/workflow-stories/{slug}.md`
+
+**Output:** Workflow story markdown under `workflow-stories/`

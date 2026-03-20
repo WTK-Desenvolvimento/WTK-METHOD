@@ -119,7 +119,7 @@ wtk-help What are my options for UX design?
 
 **Other Core Tasks and Tools**
 
-The core module includes 11 built-in tools — reviews, compression, brainstorming, document management, and more. See [Core Tools](./core-tools.md) for the complete reference.
+The core module includes built-in skills — reviews, compression, brainstorming, document management, self-hosted n8n helpers, and more. See [Core Tools](./core-tools.md) for the complete reference.
 
 ## Naming Convention
 
