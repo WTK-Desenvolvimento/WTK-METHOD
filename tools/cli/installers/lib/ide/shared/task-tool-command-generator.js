@@ -1,46 +1,46 @@
 const path = require('node:path');
 const fs = require('fs-extra');
 const csv = require('csv-parse/sync');
-const { toColonName, toColonPath, toDashPath, BMAD_FOLDER_NAME } = require('./path-utils');
+const { toColonName, toColonPath, toDashPath, WTK_FOLDER_NAME } = require('./path-utils');
 
 /**
  * Generates command files for standalone tasks and tools
  */
 class TaskToolCommandGenerator {
   /**
-   * @param {string} bmadFolderName - Name of the BMAD folder for template rendering (default: '_bmad')
+   * @param {string} wtkFolderName - Name of the WTK folder for template rendering (default: '_wtk')
    * Note: This parameter is accepted for API consistency with AgentCommandGenerator and
    * WorkflowCommandGenerator, but is not used for path stripping. The manifest always stores
-   * filesystem paths with '_bmad/' prefix (the actual folder name), while bmadFolderName is
-   * used for template placeholder rendering ({{bmadFolderName}}).
+   * filesystem paths with '_wtk/' prefix (the actual folder name), while wtkFolderName is
+   * used for template placeholder rendering ({{wtkFolderName}}).
    */
-  constructor(bmadFolderName = BMAD_FOLDER_NAME) {
-    this.bmadFolderName = bmadFolderName;
+  constructor(wtkFolderName = WTK_FOLDER_NAME) {
+    this.wtkFolderName = wtkFolderName;
   }
 
   /**
    * Collect task and tool artifacts for IDE installation
-   * @param {string} bmadDir - BMAD installation directory
+   * @param {string} wtkDir - WTK installation directory
    * @returns {Promise<Object>} Artifacts array with metadata
    */
-  async collectTaskToolArtifacts(bmadDir) {
-    const tasks = await this.loadTaskManifest(bmadDir);
-    const tools = await this.loadToolManifest(bmadDir);
+  async collectTaskToolArtifacts(wtkDir) {
+    const tasks = await this.loadTaskManifest(wtkDir);
+    const tools = await this.loadToolManifest(wtkDir);
 
     // All tasks/tools in manifest are standalone (internal=true items are filtered during manifest generation)
     const artifacts = [];
-    const bmadPrefix = `${BMAD_FOLDER_NAME}/`;
+    const wtkPrefix = `${WTK_FOLDER_NAME}/`;
 
     // Collect task artifacts
     for (const task of tasks || []) {
       let taskPath = (task.path || '').replaceAll('\\', '/');
       // Convert absolute paths to relative paths
       if (path.isAbsolute(taskPath)) {
-        taskPath = path.relative(bmadDir, taskPath).replaceAll('\\', '/');
+        taskPath = path.relative(wtkDir, taskPath).replaceAll('\\', '/');
       }
-      // Remove _bmad/ prefix if present to get relative path within bmad folder
-      if (taskPath.startsWith(bmadPrefix)) {
-        taskPath = taskPath.slice(bmadPrefix.length);
+      // Remove _wtk/ prefix if present to get relative path within bmad folder
+      if (taskPath.startsWith(wtkPrefix)) {
+        taskPath = taskPath.slice(wtkPrefix.length);
       }
 
       const taskExt = path.extname(taskPath) || '.md';
@@ -62,11 +62,11 @@ class TaskToolCommandGenerator {
       let toolPath = (tool.path || '').replaceAll('\\', '/');
       // Convert absolute paths to relative paths
       if (path.isAbsolute(toolPath)) {
-        toolPath = path.relative(bmadDir, toolPath).replaceAll('\\', '/');
+        toolPath = path.relative(wtkDir, toolPath).replaceAll('\\', '/');
       }
-      // Remove _bmad/ prefix if present to get relative path within bmad folder
-      if (toolPath.startsWith(bmadPrefix)) {
-        toolPath = toolPath.slice(bmadPrefix.length);
+      // Remove _wtk/ prefix if present to get relative path within bmad folder
+      if (toolPath.startsWith(wtkPrefix)) {
+        toolPath = toolPath.slice(wtkPrefix.length);
       }
 
       const toolExt = path.extname(toolPath) || '.md';
@@ -95,12 +95,12 @@ class TaskToolCommandGenerator {
   /**
    * Generate task and tool commands from manifest CSVs
    * @param {string} projectDir - Project directory
-   * @param {string} bmadDir - BMAD installation directory
-   * @param {string} baseCommandsDir - Optional base commands directory (defaults to .claude/commands/bmad)
+   * @param {string} wtkDir - WTK installation directory
+   * @param {string} baseCommandsDir - Optional base commands directory (defaults to .claude/commands/wtk)
    */
-  async generateTaskToolCommands(projectDir, bmadDir, baseCommandsDir = null) {
-    const tasks = await this.loadTaskManifest(bmadDir);
-    const tools = await this.loadToolManifest(bmadDir);
+  async generateTaskToolCommands(projectDir, wtkDir, baseCommandsDir = null) {
+    const tasks = await this.loadTaskManifest(wtkDir);
+    const tools = await this.loadToolManifest(wtkDir);
 
     // Base commands directory - use provided or default to Claude Code structure
     const commandsDir = baseCommandsDir || path.join(projectDir, '.claude', 'commands', 'bmad');
@@ -150,29 +150,30 @@ class TaskToolCommandGenerator {
     if (!itemPath || typeof itemPath !== 'string') {
       // Fallback: construct path from module and name if path is missing
       const typePlural = type === 'task' ? 'tasks' : 'tools';
-      itemPath = `{project-root}/${this.bmadFolderName}/${item.module}/${typePlural}/${item.name}.md`;
+      itemPath = `{project-root}/${this.wtkFolderName}/${item.module}/${typePlural}/${item.name}.md`;
     } else {
       // Normalize path separators to forward slashes
       itemPath = itemPath.replaceAll('\\', '/');
 
       // Extract relative path from absolute paths (Windows or Unix)
-      // Look for _bmad/ or bmad/ in the path and extract everything after it
-      // Match patterns like: /_bmad/core/tasks/... or /bmad/core/tasks/...
+      // Look for _wtk/ or bmad/ in the path and extract everything after it
+      // Match patterns like: /_wtk/core/tasks/... or /bmad/core/tasks/...
       // Use [/\\] to handle both Unix forward slashes and Windows backslashes,
-      // and also paths without a leading separator (e.g., C:/_bmad/...)
-      const bmadMatch = itemPath.match(/[/\\]_bmad[/\\](.+)$/) || itemPath.match(/[/\\]bmad[/\\](.+)$/);
+      // and also paths without a leading separator (e.g., C:/_wtk/...)
+      const bmadMatch = itemPath.match(/[/\\]_wtk[/\\](.+)$/) || itemPath.match(/[/\\]bmad[/\\](.+)$/);
       if (bmadMatch) {
-        // Found /_bmad/ or /bmad/ - use relative path after it
-        itemPath = `{project-root}/${this.bmadFolderName}/${bmadMatch[1]}`;
-      } else if (itemPath.startsWith(`${BMAD_FOLDER_NAME}/`)) {
-        // Relative path starting with _bmad/
-        itemPath = `{project-root}/${this.bmadFolderName}/${itemPath.slice(BMAD_FOLDER_NAME.length + 1)}`;
-      } else if (itemPath.startsWith('bmad/')) {
-        // Relative path starting with bmad/
-        itemPath = `{project-root}/${this.bmadFolderName}/${itemPath.slice(5)}`;
+        // Found /_wtk/ or /bmad/ - use relative path after it
+        itemPath = `{project-root}/${this.wtkFolderName}/${bmadMatch[1]}`;
+      } else if (itemPath.startsWith(`${WTK_FOLDER_NAME}/`)) {
+        // Relative path starting with _wtk/
+        itemPath = `{project-root}/${this.wtkFolderName}/${itemPath.slice(WTK_FOLDER_NAME.length + 1)}`;
+      } else if (itemPath.startsWith('wtk/') || itemPath.startsWith('bmad/')) {
+        // Relative path starting with wtk/ or legacy bmad/
+        const rest = itemPath.includes('/') ? itemPath.split('/').slice(1).join('/') : '';
+        itemPath = `{project-root}/${this.wtkFolderName}/${rest}`;
       } else if (!itemPath.startsWith('{project-root}')) {
         // For other relative paths, prefix with project root and bmad folder
-        itemPath = `{project-root}/${this.bmadFolderName}/${itemPath}`;
+        itemPath = `{project-root}/${this.wtkFolderName}/${itemPath}`;
       }
     }
 
@@ -191,8 +192,8 @@ Follow all instructions in the ${type} file exactly as written.
   /**
    * Load task manifest CSV
    */
-  async loadTaskManifest(bmadDir) {
-    const manifestPath = path.join(bmadDir, '_config', 'task-manifest.csv');
+  async loadTaskManifest(wtkDir) {
+    const manifestPath = path.join(wtkDir, '_config', 'task-manifest.csv');
 
     if (!(await fs.pathExists(manifestPath))) {
       return null;
@@ -208,8 +209,8 @@ Follow all instructions in the ${type} file exactly as written.
   /**
    * Load tool manifest CSV
    */
-  async loadToolManifest(bmadDir) {
-    const manifestPath = path.join(bmadDir, '_config', 'tool-manifest.csv');
+  async loadToolManifest(wtkDir) {
+    const manifestPath = path.join(wtkDir, '_config', 'tool-manifest.csv');
 
     if (!(await fs.pathExists(manifestPath))) {
       return null;
@@ -227,13 +228,13 @@ Follow all instructions in the ${type} file exactly as written.
    * Creates flat files like: bmad_bmm_help.md
    *
    * @param {string} projectDir - Project directory
-   * @param {string} bmadDir - BMAD installation directory
+   * @param {string} wtkDir - WTK installation directory
    * @param {string} baseCommandsDir - Base commands directory for the IDE
    * @returns {Object} Generation results
    */
-  async generateColonTaskToolCommands(projectDir, bmadDir, baseCommandsDir) {
-    const tasks = await this.loadTaskManifest(bmadDir);
-    const tools = await this.loadToolManifest(bmadDir);
+  async generateColonTaskToolCommands(projectDir, wtkDir, baseCommandsDir) {
+    const tasks = await this.loadTaskManifest(wtkDir);
+    const tools = await this.loadToolManifest(wtkDir);
 
     let generatedCount = 0;
 
@@ -271,20 +272,20 @@ Follow all instructions in the ${type} file exactly as written.
    * Creates flat files like: bmad_bmm_help.md
    *
    * @param {string} projectDir - Project directory
-   * @param {string} bmadDir - BMAD installation directory
+   * @param {string} wtkDir - WTK installation directory
    * @param {string} baseCommandsDir - Base commands directory for the IDE
    * @returns {Object} Generation results
    */
-  async generateDashTaskToolCommands(projectDir, bmadDir, baseCommandsDir) {
-    const tasks = await this.loadTaskManifest(bmadDir);
-    const tools = await this.loadToolManifest(bmadDir);
+  async generateDashTaskToolCommands(projectDir, wtkDir, baseCommandsDir) {
+    const tasks = await this.loadTaskManifest(wtkDir);
+    const tools = await this.loadToolManifest(wtkDir);
 
     let generatedCount = 0;
 
     // Generate command files for tasks
     for (const task of tasks || []) {
       const commandContent = this.generateCommandContent(task, 'task');
-      // Use dash format: bmad-bmm-name.md
+      // Use dash format: wtk-bmm-name.md
       const flatName = toDashPath(`${task.module}/tasks/${task.name}.md`);
       const commandPath = path.join(baseCommandsDir, flatName);
       await fs.ensureDir(path.dirname(commandPath));
@@ -295,7 +296,7 @@ Follow all instructions in the ${type} file exactly as written.
     // Generate command files for tools
     for (const tool of tools || []) {
       const commandContent = this.generateCommandContent(tool, 'tool');
-      // Use dash format: bmad-bmm-name.md
+      // Use dash format: wtk-bmm-name.md
       const flatName = toDashPath(`${tool.module}/tools/${tool.name}.md`);
       const commandPath = path.join(baseCommandsDir, flatName);
       await fs.ensureDir(path.dirname(commandPath));
@@ -338,9 +339,9 @@ Follow all instructions in the ${type} file exactly as written.
 
   /**
    * Write task/tool artifacts using dash format (NEW STANDARD)
-   * Creates flat files like: bmad-bmm-help.md
+   * Creates flat files like: wtk-bmm-help.md
    *
-   * Note: Tasks/tools do NOT have bmad-agent- prefix - only agents do.
+   * Note: Tasks/tools do NOT have wtk-agent- prefix - only agents do.
    *
    * @param {string} baseCommandsDir - Base commands directory for the IDE
    * @param {Array} artifacts - Task/tool artifacts with relativePath
@@ -352,7 +353,7 @@ Follow all instructions in the ${type} file exactly as written.
     for (const artifact of artifacts) {
       if (artifact.type === 'task' || artifact.type === 'tool') {
         const commandContent = this.generateCommandContent(artifact, artifact.type);
-        // Use dash format: bmad-module-name.md
+        // Use dash format: wtk-module-name.md
         const flatName = toDashPath(artifact.relativePath);
         const commandPath = path.join(baseCommandsDir, flatName);
         await fs.ensureDir(path.dirname(commandPath));

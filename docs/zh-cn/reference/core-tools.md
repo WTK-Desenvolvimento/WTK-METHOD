@@ -1,40 +1,40 @@
 ---
 title: "核心工具"
-description: 每个 BMad 安装都自带的内置任务和工作流参考。
+description: 每个 Wtk 安装都自带的内置任务和工作流参考。
 sidebar:
   order: 2
 ---
 
-每个 BMad 安装都包含一组核心技能，可以配合你正在做的任何事情使用——跨项目、跨模块、跨阶段的独立任务和工作流。无论安装了哪些可选模块，这些工具始终可用。
+每个 Wtk 安装都包含一组核心技能，可以配合你正在做的任何事情使用——跨项目、跨模块、跨阶段的独立任务和工作流。无论安装了哪些可选模块，这些工具始终可用。
 
 :::tip[快速上手]
-在 IDE 中输入技能名称（如 `bmad-help`）即可运行任意核心工具，无需启动智能体会话。
+在 IDE 中输入技能名称（如 `wtk-help`）即可运行任意核心工具，无需启动智能体会话。
 :::
 
 ## 概览
 
 | 工具 | 类型 | 用途 |
 | --- | --- | --- |
-| [`bmad-help`](#bmad-help) | 任务 | 根据上下文给出下一步建议 |
-| [`bmad-brainstorming`](#bmad-brainstorming) | 工作流 | 引导交互式头脑风暴 |
-| [`bmad-party-mode`](#bmad-party-mode) | 工作流 | 编排多智能体群组讨论 |
-| [`bmad-distillator`](#bmad-distillator) | 任务 | 无损的 LLM 优化文档压缩 |
-| [`bmad-advanced-elicitation`](#bmad-advanced-elicitation) | 任务 | 通过迭代精炼方法提升 LLM 输出质量 |
-| [`bmad-review-adversarial-general`](#bmad-review-adversarial-general) | 任务 | 挑刺式审查——找出遗漏和问题 |
-| [`bmad-review-edge-case-hunter`](#bmad-review-edge-case-hunter) | 任务 | 穷举分支路径分析，找出未处理的边界情况 |
-| [`bmad-editorial-review-prose`](#bmad-editorial-review-prose) | 任务 | 临床式文案编辑，聚焦表达清晰度 |
-| [`bmad-editorial-review-structure`](#bmad-editorial-review-structure) | 任务 | 结构编辑——裁剪、合并与重组 |
-| [`bmad-shard-doc`](#bmad-shard-doc) | 任务 | 将大型 Markdown 文件拆分为有序章节 |
-| [`bmad-index-docs`](#bmad-index-docs) | 任务 | 生成或更新文件夹的文档索引 |
+| [`wtk-help`](#wtk-help) | 任务 | 根据上下文给出下一步建议 |
+| [`wtk-brainstorming`](#wtk-brainstorming) | 工作流 | 引导交互式头脑风暴 |
+| [`wtk-party-mode`](#wtk-party-mode) | 工作流 | 编排多智能体群组讨论 |
+| [`wtk-distillator`](#wtk-distillator) | 任务 | 无损的 LLM 优化文档压缩 |
+| [`wtk-advanced-elicitation`](#wtk-advanced-elicitation) | 任务 | 通过迭代精炼方法提升 LLM 输出质量 |
+| [`wtk-review-adversarial-general`](#wtk-review-adversarial-general) | 任务 | 挑刺式审查——找出遗漏和问题 |
+| [`wtk-review-edge-case-hunter`](#wtk-review-edge-case-hunter) | 任务 | 穷举分支路径分析，找出未处理的边界情况 |
+| [`wtk-editorial-review-prose`](#wtk-editorial-review-prose) | 任务 | 临床式文案编辑，聚焦表达清晰度 |
+| [`wtk-editorial-review-structure`](#wtk-editorial-review-structure) | 任务 | 结构编辑——裁剪、合并与重组 |
+| [`wtk-shard-doc`](#wtk-shard-doc) | 任务 | 将大型 Markdown 文件拆分为有序章节 |
+| [`wtk-index-docs`](#wtk-index-docs) | 任务 | 生成或更新文件夹的文档索引 |
 
-## bmad-help
+## wtk-help
 
 **你的智能向导，告诉你下一步该做什么。** — 检查项目状态，识别已完成的内容，推荐下一个必需或可选步骤。
 
 **适用场景：**
 
 - 完成了一个工作流，想知道接下来做什么
-- 刚接触 BMad，需要快速了解全貌
+- 刚接触 Wtk，需要快速了解全貌
 - 卡住了，想要根据当前上下文获取建议
 - 安装了新模块，想看看有哪些可用功能
 
@@ -45,11 +45,11 @@ sidebar:
 3. 按优先级推荐下一步——必需步骤优先，可选步骤其次
 4. 每条推荐都附带技能命令和简要说明
 
-**输入：** 可选的自然语言查询（如 `bmad-help I have a SaaS idea, where do I start?`）
+**输入：** 可选的自然语言查询（如 `wtk-help I have a SaaS idea, where do I start?`）
 
 **输出：** 按优先级排列的下一步推荐列表，附带技能命令
 
-## bmad-brainstorming
+## wtk-brainstorming
 
 **通过交互式创意技法激发多样想法。** — 引导式头脑风暴会话，从技法库中加载经过验证的创意方法，引导你在整理之前先产出 100+ 个想法。
 
@@ -75,9 +75,9 @@ sidebar:
 真正的好点子往往出现在第 50-100 个想法之间。工作流鼓励在整理之前先产出 100+ 个想法。
 :::
 
-## bmad-party-mode
+## wtk-party-mode
 
-**编排多智能体群组讨论。** — 加载所有已安装的 BMad 智能体，引导一场自然对话，每个智能体从各自的专业领域和角色特征出发发言。
+**编排多智能体群组讨论。** — 加载所有已安装的 Wtk 智能体，引导一场自然对话，每个智能体从各自的专业领域和角色特征出发发言。
 
 **适用场景：**
 
@@ -97,7 +97,7 @@ sidebar:
 
 **输出：** 实时多智能体对话，各智能体保持各自角色特征
 
-## bmad-distillator
+## wtk-distillator
 
 **无损的 LLM 优化文档压缩。** — 生成信息密度高、token 高效的精馏文档，保留全部信息供下游 LLM 消费。可通过往返重构验证无损性。
 
@@ -124,7 +124,7 @@ sidebar:
 
 **输出：** 精馏 Markdown 文件，附带压缩比报告（如 "3.2:1"）
 
-## bmad-advanced-elicitation
+## wtk-advanced-elicitation
 
 **通过迭代精炼方法提升 LLM 输出质量。** — 从启发技法库中选取合适的方法，通过多轮迭代系统性地改进内容。
 
@@ -146,7 +146,7 @@ sidebar:
 
 **输出：** 应用改进后的增强版内容
 
-## bmad-review-adversarial-general
+## wtk-review-adversarial-general
 
 **预设问题存在，然后去找出来的挑刺式审查。** — 以怀疑、挑剔的审查者视角，对粗糙工作零容忍。重点找遗漏，而不只是找错误。
 
@@ -170,7 +170,7 @@ sidebar:
 
 **输出：** 包含 10+ 条发现及描述的 Markdown 列表
 
-## bmad-review-edge-case-hunter
+## wtk-review-edge-case-hunter
 
 **遍历每条分支路径和边界条件，只报告未处理的情况。** — 纯路径追踪方法论，机械地推导边界类别。与对抗式审查正交——靠方法驱动，而非靠态度驱动。
 
@@ -195,10 +195,10 @@ sidebar:
 **输出：** JSON 数组，每条发现包含 `location`、`trigger_condition`、`guard_snippet` 和 `potential_consequence`
 
 :::note[互补审查]
-同时运行 `bmad-review-adversarial-general` 和 `bmad-review-edge-case-hunter` 可获得正交覆盖。对抗式审查捕捉质量和完整性问题；边界猎手捕捉未处理的路径。
+同时运行 `wtk-review-adversarial-general` 和 `wtk-review-edge-case-hunter` 可获得正交覆盖。对抗式审查捕捉质量和完整性问题；边界猎手捕捉未处理的路径。
 :::
 
-## bmad-editorial-review-prose
+## wtk-editorial-review-prose
 
 **聚焦表达清晰度的临床式文案编辑。** — 审查文本中阻碍理解的问题，以 Microsoft 写作风格指南为基准，保留作者个人风格。
 
@@ -223,7 +223,7 @@ sidebar:
 
 **输出：** 三列 Markdown 表格：原文 | 修改后 | 变更说明
 
-## bmad-editorial-review-structure
+## wtk-editorial-review-structure
 
 **结构编辑——提出裁剪、合并、移动和精简建议。** — 审查文档组织结构，在文案编辑之前提出实质性调整建议，以改善清晰度和阅读流畅性。
 
@@ -250,7 +250,7 @@ sidebar:
 
 **输出：** 文档摘要、优先级排序的建议列表，以及预估缩减量
 
-## bmad-shard-doc
+## wtk-shard-doc
 
 **将大型 Markdown 文件拆分为有序的章节文件。** — 以二级标题为分割点，创建一个包含独立章节文件和索引的文件夹。
 
@@ -271,7 +271,7 @@ sidebar:
 
 **输出：** 包含 `index.md` 和 `01-{section}.md`、`02-{section}.md` 等文件的文件夹
 
-## bmad-index-docs
+## wtk-index-docs
 
 **生成或更新文件夹中所有文档的索引。** — 扫描目录，读取每个文件以理解其用途，生成一份带链接和描述的有序 `index.md`。
 

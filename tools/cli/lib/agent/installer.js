@@ -1,5 +1,5 @@
 /**
- * BMAD Agent Installer
+ * WTK Agent Installer
  * Discovers, prompts, compiles, and installs agents
  */
 
@@ -11,22 +11,22 @@ const { compileAgent, compileAgentFile } = require('./compiler');
 const { extractInstallConfig, getDefaultValues } = require('./template-engine');
 
 /**
- * Find BMAD config file in project
+ * Find WTK config file in project
  * @param {string} startPath - Starting directory to search from
  * @returns {Object|null} Config data or null
  */
-function findBmadConfig(startPath = process.cwd()) {
-  // Look for common BMAD folder names
-  const possibleNames = ['_bmad'];
+function findWtkConfig(startPath = process.cwd()) {
+  // Look for common WTK folder names
+  const possibleNames = ['_wtk'];
 
   for (const name of possibleNames) {
-    const configPath = path.join(startPath, name, 'bmb', 'config.yaml');
+    const configPath = path.join(startPath, name, 'bmm', 'config.yaml');
     if (fs.existsSync(configPath)) {
       const content = fs.readFileSync(configPath, 'utf8');
       const config = yaml.parse(content);
       return {
         ...config,
-        bmadFolder: path.join(startPath, name),
+        wtkFolder: path.join(startPath, name),
         projectRoot: startPath,
       };
     }
@@ -36,13 +36,13 @@ function findBmadConfig(startPath = process.cwd()) {
 }
 
 /**
- * Resolve path variables like {project-root} and {bmad-folder}
+ * Resolve path variables like {project-root} and {wtk-folder}
  * @param {string} pathStr - Path with variables
- * @param {Object} context - Contains projectRoot, bmadFolder
+ * @param {Object} context - Contains projectRoot, wtkFolder
  * @returns {string} Resolved path
  */
 function resolvePath(pathStr, context) {
-  return pathStr.replaceAll('{project-root}', context.projectRoot).replaceAll('{bmad-folder}', context.bmadFolder);
+  return pathStr.replaceAll('{project-root}', context.projectRoot).replaceAll('{wtk-folder}', context.wtkFolder);
 }
 
 /**
@@ -243,26 +243,26 @@ function updateAgentId(compiledContent, targetPath) {
 }
 
 /**
- * Detect if a path is within a BMAD project
+ * Detect if a path is within a WTK project
  * @param {string} targetPath - Path to check
- * @returns {Object|null} Project info with bmadFolder and cfgFolder
+ * @returns {Object|null} Project info with wtkFolder and cfgFolder
  */
-function detectBmadProject(targetPath) {
+function detectWtkProject(targetPath) {
   let checkPath = path.resolve(targetPath);
   const root = path.parse(checkPath).root;
 
-  // Walk up directory tree looking for BMAD installation
+  // Walk up directory tree looking for WTK installation
   while (checkPath !== root) {
-    const possibleNames = ['_bmad'];
+    const possibleNames = ['_wtk'];
     for (const name of possibleNames) {
-      const bmadFolder = path.join(checkPath, name);
-      const cfgFolder = path.join(bmadFolder, '_config');
+      const wtkFolder = path.join(checkPath, name);
+      const cfgFolder = path.join(wtkFolder, '_config');
       const manifestFile = path.join(cfgFolder, 'agent-manifest.csv');
 
       if (fs.existsSync(manifestFile)) {
         return {
           projectRoot: checkPath,
-          bmadFolder,
+          wtkFolder,
           cfgFolder,
           manifestFile,
         };
@@ -535,7 +535,7 @@ function saveAgentSource(agentInfo, cfgFolder, agentName, answers = {}) {
  */
 async function createIdeSlashCommands(projectRoot, agentName, agentPath, metadata) {
   // Read manifest.yaml to get installed IDEs
-  const manifestPath = path.join(projectRoot, '_bmad', '_config', 'manifest.yaml');
+  const manifestPath = path.join(projectRoot, '_wtk', '_config', 'manifest.yaml');
   let installedIdes = ['claude-code']; // Default to Claude Code if no manifest
 
   if (fs.existsSync(manifestPath)) {
@@ -660,14 +660,14 @@ function extractManifestData(xmlContent, metadata, agentPath, moduleName = 'cust
 }
 
 module.exports = {
-  findBmadConfig,
+  findWtkConfig,
   resolvePath,
   discoverAgents,
   loadAgentConfig,
   promptInstallQuestions,
   installAgent,
   updateAgentId,
-  detectBmadProject,
+  detectWtkProject,
   addToManifest,
   extractManifestData,
   escapeCsvField,

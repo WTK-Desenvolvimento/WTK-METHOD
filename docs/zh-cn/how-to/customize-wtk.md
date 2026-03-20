@@ -1,5 +1,5 @@
 ---
-title: "如何自定义 BMad"
+title: "如何自定义 Wtk"
 description: 自定义智能体、工作流和模块，同时保持更新兼容性
 sidebar:
   order: 7
@@ -15,7 +15,7 @@ sidebar:
 - 您希望智能体在每次启动时执行特定操作
 
 :::note[前置条件]
-- 在项目中安装了 BMad（参见[如何安装 BMad](./install-bmad.md)）
+- 在项目中安装了 Wtk（参见[如何安装 Wtk](./install-wtk.md)）
 - 用于编辑 YAML 文件的文本编辑器
 :::
 
@@ -30,8 +30,8 @@ sidebar:
 安装后，在以下位置为每个智能体找到一个 `.customize.yaml` 文件：
 
 ```text
-_bmad/_config/agents/
-├── core-bmad-master.customize.yaml
+_wtk/_config/agents/
+├── core-wtk-master.customize.yaml
 ├── bmm-dev.customize.yaml
 ├── bmm-pm.customize.yaml
 └── ...（每个已安装的智能体一个文件）
@@ -131,7 +131,7 @@ prompts:
 编辑后，重新编译智能体以应用更改：
 
 ```bash
-npx bmad-method install
+npx wtk-method install
 ```
 
 安装程序会检测现有安装并提供以下选项：
@@ -140,7 +140,7 @@ npx bmad-method install
 | ---------------------------- | ------------------------------------------------------------------- |
 | **Quick Update**             | 将所有模块更新到最新版本并重新编译所有智能体                 |
 | **Recompile Agents**         | 仅应用自定义配置，不更新模块文件                             |
-| **Modify BMad Installation** | 用于添加或删除模块的完整安装流程                             |
+| **Modify Wtk Installation** | 用于添加或删除模块的完整安装流程                             |
 
 对于仅自定义配置的更改，**Recompile Agents** 是最快的选项。
 
@@ -148,7 +148,7 @@ npx bmad-method install
 
 **更改未生效？**
 
-- 运行 `npx bmad-method install` 并选择 **Recompile Agents** 以应用更改
+- 运行 `npx wtk-method install` 并选择 **Recompile Agents** 以应用更改
 - 检查您的 YAML 语法是否有效（缩进很重要）
 - 验证您编辑的是该智能体正确的 `.customize.yaml` 文件
 
@@ -161,11 +161,11 @@ npx bmad-method install
 **需要重置智能体？**
 
 - 清空或删除智能体的 `.customize.yaml` 文件
-- 运行 `npx bmad-method install` 并选择 **Recompile Agents** 以恢复默认设置
+- 运行 `npx wtk-method install` 并选择 **Recompile Agents** 以恢复默认设置
 
 ## 工作流自定义
 
-对现有 BMad Method 工作流和技能的自定义即将推出。
+对现有 Wtk Method 工作流和技能的自定义即将推出。
 
 ## 模块自定义
 

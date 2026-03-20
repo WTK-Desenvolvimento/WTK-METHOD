@@ -1,7 +1,7 @@
 /**
- * BMAD Agent Compiler
+ * WTK Agent Compiler
  * Transforms agent YAML to compiled XML (.md) format
- * Uses the existing BMAD builder infrastructure for proper formatting
+ * Uses the existing WTK builder infrastructure for proper formatting
  */
 
 const yaml = require('yaml');
@@ -20,7 +20,7 @@ const { AgentAnalyzer } = require('../agent-analyzer');
  */
 function buildFrontmatter(metadata, agentName) {
   const nameFromFile = agentName.replaceAll('-', ' ');
-  const description = metadata.title || 'BMAD Agent';
+  const description = metadata.title || 'WTK Agent';
 
   return `---
 name: "${nameFromFile}"
@@ -157,7 +157,7 @@ function buildMenuXml(menuItems) {
     }
   }
 
-  xml += `    <item cmd="PM or fuzzy match on party-mode" exec="skill:bmad-party-mode">[PM] Start Party Mode</item>\n`;
+  xml += `    <item cmd="PM or fuzzy match on party-mode" exec="skill:wtk-party-mode">[PM] Start Party Mode</item>\n`;
   xml += `    <item cmd="DA or fuzzy match on exit, leave, goodbye or dismiss agent">[DA] Dismiss Agent</item>\n`;
 
   xml += '  </menu>\n';

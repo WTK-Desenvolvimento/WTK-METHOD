@@ -1,28 +1,28 @@
 const path = require('node:path');
 const fs = require('fs-extra');
-const { toColonPath, toDashPath, customAgentColonName, customAgentDashName, BMAD_FOLDER_NAME } = require('./path-utils');
+const { toColonPath, toDashPath, customAgentColonName, customAgentDashName, WTK_FOLDER_NAME } = require('./path-utils');
 
 /**
  * Generates launcher command files for each agent
  * Similar to WorkflowCommandGenerator but for agents
  */
 class AgentCommandGenerator {
-  constructor(bmadFolderName = BMAD_FOLDER_NAME) {
+  constructor(wtkFolderName = WTK_FOLDER_NAME) {
     this.templatePath = path.join(__dirname, '../templates/agent-command-template.md');
-    this.bmadFolderName = bmadFolderName;
+    this.wtkFolderName = wtkFolderName;
   }
 
   /**
    * Collect agent artifacts for IDE installation
-   * @param {string} bmadDir - BMAD installation directory
+   * @param {string} wtkDir - WTK installation directory
    * @param {Array} selectedModules - Modules to include
    * @returns {Object} Artifacts array with metadata
    */
-  async collectAgentArtifacts(bmadDir, selectedModules = []) {
-    const { getAgentsFromBmad } = require('./bmad-artifacts');
+  async collectAgentArtifacts(wtkDir, selectedModules = []) {
+    const { getAgentsFromWtk } = require('./wtk-artifacts');
 
     // Get agents from INSTALLED bmad/ directory
-    const agents = await getAgentsFromBmad(bmadDir, selectedModules);
+    const agents = await getAgentsFromWtk(wtkDir, selectedModules);
 
     const artifacts = [];
 
@@ -34,10 +34,10 @@ class AgentCommandGenerator {
       let agentRelPath = agent.path || '';
       // Normalize path separators for cross-platform compatibility
       agentRelPath = agentRelPath.replaceAll('\\', '/');
-      // Remove _bmad/ prefix if present to get relative path from project root
-      // Handle both absolute paths (/path/to/_bmad/...) and relative paths (_bmad/...)
-      if (agentRelPath.includes('_bmad/')) {
-        const parts = agentRelPath.split(/_bmad\//);
+      // Remove _wtk/ prefix if present to get relative path from project root
+      // Handle both absolute paths (/path/to/_wtk/...) and relative paths (_wtk/...)
+      if (agentRelPath.includes('_wtk/')) {
+        const parts = agentRelPath.split(/_wtk\//);
         if (parts.length > 1) {
           agentRelPath = parts.slice(1).join('/');
         }
@@ -80,8 +80,7 @@ class AgentCommandGenerator {
       .replaceAll('{{module}}', agent.module)
       .replaceAll('{{path}}', agentPathInModule)
       .replaceAll('{{description}}', agent.description || `${agent.name} agent`)
-      .replaceAll('_bmad', this.bmadFolderName)
-      .replaceAll('_bmad', '_bmad');
+      .replaceAll('_wtk', this.wtkFolderName);
   }
 
   /**
@@ -134,9 +133,9 @@ class AgentCommandGenerator {
 
   /**
    * Write agent launcher artifacts using dash format (NEW STANDARD)
-   * Creates flat files like: bmad-agent-bmm-pm.md
+   * Creates flat files like: wtk-agent-bmm-pm.md
    *
-   * The bmad-agent- prefix distinguishes agents from workflows/tasks/tools.
+   * The wtk-agent- prefix distinguishes agents from workflows/tasks/tools.
    *
    * @param {string} baseCommandsDir - Base commands directory for the IDE
    * @param {Array} artifacts - Agent launcher artifacts
@@ -147,7 +146,7 @@ class AgentCommandGenerator {
 
     for (const artifact of artifacts) {
       if (artifact.type === 'agent-launcher') {
-        // Convert relativePath to dash format: bmm/agents/pm.md → bmad-agent-bmm-pm.md
+        // Convert relativePath to dash format: bmm/agents/pm.md → wtk-agent-bmm-pm.md
         const flatName = toDashPath(artifact.relativePath);
         const launcherPath = path.join(baseCommandsDir, flatName);
         await fs.ensureDir(path.dirname(launcherPath));

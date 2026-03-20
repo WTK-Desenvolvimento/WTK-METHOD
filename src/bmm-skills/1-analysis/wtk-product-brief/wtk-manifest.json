@@ -1,6 +1,6 @@
 {
   "module-code": "bmm",
-  "replaces-skill": "bmad-create-product-brief",
+  "replaces-skill": "wtk-create-product-brief",
   "capabilities": [
     {
       "name": "create-brief",

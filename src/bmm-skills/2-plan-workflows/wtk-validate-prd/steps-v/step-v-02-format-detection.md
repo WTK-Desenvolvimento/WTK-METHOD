@@ -10,7 +10,7 @@ validationReportPath: '{validation_report_path}'
 
 ## STEP GOAL:
 
-Detect if PRD follows BMAD format and route appropriately - classify as BMAD Standard / BMAD Variant / Non-Standard, with optional parity check for non-standard formats.
+Detect if PRD follows WTK format and route appropriately - classify as WTK Standard / WTK Variant / Non-Standard, with optional parity check for non-standard formats.
 
 ## MANDATORY EXECUTION RULES (READ FIRST):
 
@@ -69,9 +69,9 @@ Load the complete PRD file and extract:
 - Extract classification.projectType if present
 - Note any other relevant metadata
 
-### 2. Check for BMAD PRD Core Sections
+### 2. Check for WTK PRD Core Sections
 
-Check if the PRD contains the following BMAD PRD core sections:
+Check if the PRD contains the following WTK PRD core sections:
 
 1. **Executive Summary** (or variations: ## Executive Summary, ## Overview, ## Introduction)
 2. **Success Criteria** (or: ## Success Criteria, ## Goals, ## Objectives)
@@ -89,18 +89,18 @@ Check if the PRD contains the following BMAD PRD core sections:
 
 Based on core section count, classify:
 
-**BMAD Standard:**
+**WTK Standard:**
 - 5-6 core sections present
-- Follows BMAD PRD structure closely
+- Follows WTK PRD structure closely
 
-**BMAD Variant:**
+**WTK Variant:**
 - 3-4 core sections present
-- Generally follows BMAD patterns but may have structural differences
-- Missing some sections but recognizable as BMAD-style
+- Generally follows WTK patterns but may have structural differences
+- Missing some sections but recognizable as WTK-style
 
 **Non-Standard:**
 - Fewer than 3 core sections present
-- Does not follow BMAD PRD structure
+- Does not follow WTK PRD structure
 - May be completely custom format, legacy format, or from another framework
 
 ### 4. Report Format Findings to Validation Report
@@ -113,7 +113,7 @@ Append to validation report:
 **PRD Structure:**
 [List all ## Level 2 headers found]
 
-**BMAD Core Sections Present:**
+**WTK Core Sections Present:**
 - Executive Summary: [Present/Missing]
 - Success Criteria: [Present/Missing]
 - Product Scope: [Present/Missing]
@@ -121,13 +121,13 @@ Append to validation report:
 - Functional Requirements: [Present/Missing]
 - Non-Functional Requirements: [Present/Missing]
 
-**Format Classification:** [BMAD Standard / BMAD Variant / Non-Standard]
+**Format Classification:** [WTK Standard / WTK Variant / Non-Standard]
 **Core Sections Present:** [count]/6
 ```
 
 ### 5. Route Based on Format Classification
 
-**IF format is BMAD Standard or BMAD Variant:**
+**IF format is WTK Standard or WTK Variant:**
 
 Display: "**Format Detected:** {classification}
 
@@ -139,7 +139,7 @@ Without delay, read fully and follow: {nextStepFile} (step-v-03-density-validati
 
 Display: "**Format Detected:** Non-Standard PRD
 
-This PRD does not follow BMAD standard structure (only {count}/6 core sections present).
+This PRD does not follow WTK standard structure (only {count}/6 core sections present).
 
 You have options:"
 
@@ -147,7 +147,7 @@ Present MENU OPTIONS below for user selection
 
 ### 6. Present MENU OPTIONS (Non-Standard PRDs Only)
 
-**[A] Parity Check** - Analyze gaps and estimate effort to reach BMAD PRD parity
+**[A] Parity Check** - Analyze gaps and estimate effort to reach WTK PRD parity
 **[B] Validate As-Is** - Proceed with validation using current structure
 **[C] Exit** - Exit validation and review format findings
 
@@ -170,10 +170,10 @@ Present MENU OPTIONS below for user selection
 ### ✅ SUCCESS:
 
 - All ## Level 2 headers extracted successfully
-- BMAD core sections checked systematically
+- WTK core sections checked systematically
 - Format classified correctly based on section count
 - Findings reported to validation report
-- BMAD Standard/Variant PRDs proceed directly to next validation step
+- WTK Standard/Variant PRDs proceed directly to next validation step
 - Non-Standard PRDs pause and present options to user
 - User can choose parity check, validate as-is, or exit
 

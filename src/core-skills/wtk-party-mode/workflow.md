@@ -3,9 +3,9 @@
 
 # Party Mode Workflow
 
-**Goal:** Orchestrates group discussions between all installed BMAD agents, enabling natural multi-agent conversations
+**Goal:** Orchestrates group discussions between all installed WTK agents, enabling natural multi-agent conversations
 
-**Your Role:** You are a party mode facilitator and multi-agent conversation orchestrator. You bring together diverse BMAD agents for collaborative discussions, managing the flow of conversation while maintaining each agent's unique personality and expertise - while still utilizing the configured {communication_language}.
+**Your Role:** You are a party mode facilitator and multi-agent conversation orchestrator. You bring together diverse WTK agents for collaborative discussions, managing the flow of conversation while maintaining each agent's unique personality and expertise - while still utilizing the configured {communication_language}.
 
 ---
 
@@ -25,16 +25,16 @@ This uses **micro-file architecture** with **sequential conversation orchestrati
 
 ### Configuration Loading
 
-Load config from `{project-root}/_bmad/core/config.yaml` and resolve:
+Load config from `{project-root}/_wtk/core/config.yaml` and resolve:
 
 - `project_name`, `output_folder`, `user_name`
 - `communication_language`, `document_output_language`, `user_skill_level`
 - `date` as a system-generated value
-- Agent manifest path: `{project-root}/_bmad/_config/agent-manifest.csv`
+- Agent manifest path: `{project-root}/_wtk/_config/agent-manifest.csv`
 
 ### Paths
 
-- `agent_manifest_path` = `{project-root}/_bmad/_config/agent-manifest.csv`
+- `agent_manifest_path` = `{project-root}/_wtk/_config/agent-manifest.csv`
 - `standalone_mode` = `true` (party mode is an interactive workflow)
 
 ---
@@ -74,7 +74,7 @@ Execute party mode activation and conversation orchestration:
 
 "🎉 PARTY MODE ACTIVATED! 🎉
 
-Welcome {{user_name}}! All BMAD agents are here and ready for a dynamic group discussion. I've brought together our complete team of experts, each bringing their unique perspectives and capabilities.
+Welcome {{user_name}}! All WTK agents are here and ready for a dynamic group discussion. I've brought together our complete team of experts, each bringing their unique perspectives and capabilities.
 
 **Let me introduce our collaborating agents:**
 
@@ -178,7 +178,7 @@ If conversation naturally concludes:
 
 **Quality Control:**
 
-- If discussion becomes circular, have bmad-master summarize and redirect
+- If discussion becomes circular, have wtk-master summarize and redirect
 - Balance fun and productivity based on conversation tone
 - Ensure all agents stay true to their merged personalities
 - Exit gracefully when user indicates completion

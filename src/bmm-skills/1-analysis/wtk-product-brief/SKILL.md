@@ -1,5 +1,5 @@
 ---
-name: bmad-product-brief
+name: wtk-product-brief
 description: Create or update product briefs through guided or autonomous discovery. Use when the user requests to create or update a Product Brief.
 ---
 
@@ -30,7 +30,7 @@ Check activation context immediately:
 
 ## On Activation
 
-1. Load config from `{project-root}/_bmad/bmm/config.yaml` and resolve::
+1. Load config from `{project-root}/_wtk/bmm/config.yaml` and resolve::
    - Use `{user_name}` for greeting
    - Use `{communication_language}` for all communications
    - Use `{document_output_language}` for output documents
@@ -84,4 +84,4 @@ Check activation context immediately:
 ## External Skills
 
 This workflow uses:
-- `bmad-init` — Configuration loading (module: bmm)
+- `wtk-init` — Configuration loading (module: bmm)

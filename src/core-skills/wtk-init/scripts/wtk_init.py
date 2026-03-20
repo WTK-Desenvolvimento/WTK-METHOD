@@ -5,31 +5,31 @@
 
 #!/usr/bin/env python3
 """
-BMad Init — Project configuration bootstrap and config loader.
+Wtk Init — Project configuration bootstrap and config loader.
 
 Config files (flat YAML per module):
-  - _bmad/core/config.yaml (core settings — user_name, language, output_folder, etc.)
-  - _bmad/{module}/config.yaml (module settings + core values merged in)
+  - _wtk/core/config.yaml (core settings — user_name, language, output_folder, etc.)
+  - _wtk/{module}/config.yaml (module settings + core values merged in)
 
 Usage:
   # Fast path — load all vars for a module (includes core vars)
-  python bmad_init.py load --module bmb --all --project-root /path
+  python wtk_init.py load --module bmb --all --project-root /path
 
   # Load specific vars with optional defaults
-  python bmad_init.py load --module bmb --vars var1:default1,var2 --project-root /path
+  python wtk_init.py load --module bmb --vars var1:default1,var2 --project-root /path
 
   # Load core only
-  python bmad_init.py load --all --project-root /path
+  python wtk_init.py load --all --project-root /path
 
   # Check if init is needed
-  python bmad_init.py check --project-root /path
-  python bmad_init.py check --module bmb --skill-path /path/to/skill --project-root /path
+  python wtk_init.py check --project-root /path
+  python wtk_init.py check --module bmb --skill-path /path/to/skill --project-root /path
 
   # Resolve module defaults given core answers
-  python bmad_init.py resolve-defaults --module bmb --core-answers '{"output_folder":"..."}' --project-root /path
+  python wtk_init.py resolve-defaults --module bmb --core-answers '{"output_folder":"..."}' --project-root /path
 
   # Write config from answered questions
-  python bmad_init.py write --answers '{"core": {...}, "bmb": {...}}' --project-root /path
+  python wtk_init.py write --answers '{"core": {...}, "bmb": {...}}' --project-root /path
 """
 
 import argparse
@@ -47,7 +47,7 @@ import yaml
 
 def find_project_root(llm_provided=None):
     """
-    Find project root by looking for _bmad folder.
+    Find project root by looking for _wtk folder.
 
     Args:
         llm_provided: Path explicitly provided via --project-root.
@@ -57,16 +57,16 @@ def find_project_root(llm_provided=None):
     """
     if llm_provided:
         candidate = Path(llm_provided)
-        if (candidate / '_bmad').exists():
+        if (candidate / '_wtk').exists():
             return candidate
-        # First run — _bmad won't exist yet but LLM path is still valid
+        # First run — _wtk won't exist yet but LLM path is still valid
         if candidate.is_dir():
             return candidate
 
     for start_dir in [Path.cwd(), Path(__file__).resolve().parent]:
         current_dir = start_dir
         while current_dir != current_dir.parent:
-            if (current_dir / '_bmad').exists():
+            if (current_dir / '_wtk').exists():
                 return current_dir
             current_dir = current_dir.parent
 
@@ -123,7 +123,7 @@ def find_target_module_yaml(module_code, project_root, skill_path=None):
     Search order:
       1. skill_path/assets/module.yaml (calling skill's assets)
       2. skill_path/module.yaml (calling skill's root)
-      3. _bmad/{module_code}/module.yaml (installed module location)
+      3. _wtk/{module_code}/module.yaml (installed module location)
     """
     search_paths = []
 
@@ -133,7 +133,7 @@ def find_target_module_yaml(module_code, project_root, skill_path=None):
         search_paths.append(sp / 'module.yaml')
 
     if project_root and module_code:
-        search_paths.append(Path(project_root) / '_bmad' / module_code / 'module.yaml')
+        search_paths.append(Path(project_root) / '_wtk' / module_code / 'module.yaml')
 
     for path in search_paths:
         if path.exists():
@@ -157,8 +157,8 @@ def load_config_file(path):
 
 
 def load_module_config(module_code, project_root):
-    """Load config for a specific module from _bmad/{module}/config.yaml."""
-    config_path = Path(project_root) / '_bmad' / module_code / 'config.yaml'
+    """Load config for a specific module from _wtk/{module}/config.yaml."""
+    config_path = Path(project_root) / '_wtk' / module_code / 'config.yaml'
     return load_config_file(config_path)
 
 
@@ -215,8 +215,8 @@ def apply_result_template(var_def, raw_value, context):
     """
     Apply a variable's result template to transform the raw user answer.
 
-    E.g., result: "{project-root}/{value}" with value="_bmad-output"
-    becomes "/Users/foo/project/_bmad-output"
+    E.g., result: "{project-root}/{value}" with value="_wtk-output"
+    becomes "/Users/foo/project/_wtk-output"
     """
     result_template = var_def.get('result')
     if not result_template:
@@ -235,7 +235,7 @@ def cmd_load(args):
     """Load config vars — the fast path."""
     project_root = find_project_root(llm_provided=args.project_root)
     if not project_root:
-        print(json.dumps({'error': 'Project root not found (_bmad folder not detected)'}),
+        print(json.dumps({'error': 'Project root not found (_wtk folder not detected)'}),
               file=sys.stderr)
         sys.exit(1)
 
@@ -445,7 +445,7 @@ def cmd_write(args):
             core_config[var_name] = expanded
 
         # Write core config
-        core_dir = project_root / '_bmad' / 'core'
+        core_dir = project_root / '_wtk' / 'core'
         core_dir.mkdir(parents=True, exist_ok=True)
         core_config_path = core_dir / 'config.yaml'
 
@@ -458,7 +458,7 @@ def cmd_write(args):
     elif core_answers_raw:
         # No core_def available — write raw values
         core_config = dict(core_answers_raw)
-        core_dir = project_root / '_bmad' / 'core'
+        core_dir = project_root / '_wtk' / 'core'
         core_dir.mkdir(parents=True, exist_ok=True)
         core_config_path = core_dir / 'config.yaml'
         existing = load_config_file(core_config_path) or {}
@@ -495,7 +495,7 @@ def cmd_write(args):
             context[var_name] = expanded  # Available for subsequent template expansion
 
         # Write module config
-        module_dir = project_root / '_bmad' / module_code
+        module_dir = project_root / '_wtk' / module_code
         module_dir.mkdir(parents=True, exist_ok=True)
         module_config_path = module_dir / 'config.yaml'
 
@@ -527,7 +527,7 @@ def _write_config_file(path, data, module_label):
     from datetime import datetime, timezone
     with open(path, 'w', encoding='utf-8') as f:
         f.write(f'# {module_label} Module Configuration\n')
-        f.write(f'# Generated by bmad-init\n')
+        f.write(f'# Generated by wtk-init\n')
         f.write(f'# Date: {datetime.now(timezone.utc).isoformat()}\n\n')
         yaml.safe_dump(data, f, default_flow_style=False, allow_unicode=True, sort_keys=False)
 

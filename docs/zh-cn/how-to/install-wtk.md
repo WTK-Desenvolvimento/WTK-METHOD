@@ -1,19 +1,19 @@
 ---
-title: "如何安装 BMad"
-description: 在项目中安装 BMad 的分步指南
+title: "如何安装 Wtk"
+description: 在项目中安装 Wtk 的分步指南
 sidebar:
   order: 1
 ---
 
-使用 `npx bmad-method install` 命令在项目中设置 BMad，并选择你需要的模块和 AI 工具。
+使用 `npx wtk-method install` 命令在项目中设置 Wtk，并选择你需要的模块和 AI 工具。
 
 如果你想使用非交互式安装程序并在命令行中提供所有安装选项，请参阅[本指南](./non-interactive-installation.md)。
 
 ## 何时使用
 
-- 使用 BMad 启动新项目
-- 将 BMad 添加到现有代码库
-- 更新现有的 BMad 安装
+- 使用 Wtk 启动新项目
+- 将 Wtk 添加到现有代码库
+- 更新现有的 Wtk 安装
 
 :::note[前置条件]
 - **Node.js** 20+（安装程序必需）
@@ -26,19 +26,19 @@ sidebar:
 ### 1. 运行安装程序
 
 ```bash
-npx bmad-method install
+npx wtk-method install
 ```
 
 :::tip[最新版本]
 要从主分支安装最新版本（可能不稳定）：
 ```bash
-npx github:bmad-code-org/BMAD-METHOD install
+npx github:wtk-code-org/WTK-METHOD install
 ```
 :::
 
 ### 2. 选择安装位置
 
-安装程序会询问在哪里安装 BMad 文件：
+安装程序会询问在哪里安装 Wtk 文件：
 
 - 当前目录（如果你自己创建了目录并从该目录运行，推荐用于新项目）
 - 自定义路径
@@ -55,7 +55,7 @@ npx github:bmad-code-org/BMAD-METHOD install
 
 ### 4. 选择模块
 
-安装程序会显示可用的模块。选择你需要的模块——大多数用户只需要 **BMad Method**（软件开发模块）。
+安装程序会显示可用的模块。选择你需要的模块——大多数用户只需要 **Wtk Method**（软件开发模块）。
 
 ### 5. 按照提示操作
 
@@ -65,36 +65,36 @@ npx github:bmad-code-org/BMAD-METHOD install
 
 ```text
 your-project/
-├── _bmad/
+├── _wtk/
 │   ├── bmm/            # 你选择的模块
 │   │   └── config.yaml # 模块设置（如果你需要更改它们）
 │   ├── core/           # 必需的核心模块
 │   └── ...
-├── _bmad-output/       # 生成的工件
+├── _wtk-output/       # 生成的工件
 ├── .claude/            # Claude Code 命令（如果使用 Claude Code）
 └── .kiro/              # Kiro 引导文件（如果使用 Kiro）
 ```
 
 ## 验证安装
 
-运行 `bmad-help` 来验证一切正常并查看下一步操作。
+运行 `wtk-help` 来验证一切正常并查看下一步操作。
 
-**BMad-Help 是你的智能向导**，它会：
+**Wtk-Help 是你的智能向导**，它会：
 - 确认你的安装正常工作
 - 根据你安装的模块显示可用内容
 - 推荐你的第一步
 
 你也可以向它提问：
 ```
-bmad-help 我刚安装完成，应该先做什么？
-bmad-help 对于 SaaS 项目我有哪些选项？
+wtk-help 我刚安装完成，应该先做什么？
+wtk-help 对于 SaaS 项目我有哪些选项？
 ```
 
 ## 故障排除
 
 **安装程序抛出错误**——将输出复制粘贴到你的 AI 助手中，让它来解决问题。
 
-**安装程序工作正常但后续出现问题**——你的 AI 需要 BMad 上下文才能提供帮助。请参阅[如何获取关于 BMad 的答案](./get-answers-about-bmad.md)了解如何将你的 AI 指向正确的来源。
+**安装程序工作正常但后续出现问题**——你的 AI 需要 Wtk 上下文才能提供帮助。请参阅[如何获取关于 Wtk 的答案](./get-answers-about-wtk.md)了解如何将你的 AI 指向正确的来源。
 
 ---
 ## 术语说明

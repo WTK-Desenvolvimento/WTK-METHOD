@@ -5,7 +5,7 @@ const yaml = require('yaml');
 const prompts = require('../../../lib/prompts');
 
 /**
- * Dependency Resolver for BMAD modules
+ * Dependency Resolver for WTK modules
  * Handles cross-module dependencies and ensures all required files are included
  */
 class DependencyResolver {
@@ -17,12 +17,12 @@ class DependencyResolver {
 
   /**
    * Resolve all dependencies for selected modules
-   * @param {string} bmadDir - BMAD installation directory
+   * @param {string} wtkDir - WTK installation directory
    * @param {Array} selectedModules - Modules explicitly selected by user
    * @param {Object} options - Resolution options
    * @returns {Object} Resolution results with all required files
    */
-  async resolve(bmadDir, selectedModules = [], options = {}) {
+  async resolve(wtkDir, selectedModules = [], options = {}) {
     if (options.verbose) {
       await prompts.log.info('Resolving module dependencies...');
     }
@@ -31,22 +31,22 @@ class DependencyResolver {
     const modulesToProcess = new Set(['core', ...selectedModules]);
 
     // First pass: collect all explicitly selected files
-    const primaryFiles = await this.collectPrimaryFiles(bmadDir, modulesToProcess, options);
+    const primaryFiles = await this.collectPrimaryFiles(wtkDir, modulesToProcess, options);
 
     // Second pass: parse and resolve dependencies
     const allDependencies = await this.parseDependencies(primaryFiles);
 
     // Third pass: resolve dependency paths and collect files
-    const resolvedDeps = await this.resolveDependencyPaths(bmadDir, allDependencies);
+    const resolvedDeps = await this.resolveDependencyPaths(wtkDir, allDependencies);
 
     // Fourth pass: check for transitive dependencies
-    const transitiveDeps = await this.resolveTransitiveDependencies(bmadDir, resolvedDeps);
+    const transitiveDeps = await this.resolveTransitiveDependencies(wtkDir, resolvedDeps);
 
     // Combine all files
     const allFiles = new Set([...primaryFiles.map((f) => f.path), ...resolvedDeps, ...transitiveDeps]);
 
     // Organize by module
-    const organizedFiles = this.organizeByModule(bmadDir, allFiles);
+    const organizedFiles = this.organizeByModule(wtkDir, allFiles);
 
     // Report results (only in verbose mode)
     if (options.verbose) {
@@ -66,7 +66,7 @@ class DependencyResolver {
   /**
    * Collect primary files from selected modules
    */
-  async collectPrimaryFiles(bmadDir, modules, options = {}) {
+  async collectPrimaryFiles(wtkDir, modules, options = {}) {
     const files = [];
     const { moduleManager } = options;
 
@@ -80,7 +80,7 @@ class DependencyResolver {
       let moduleDir;
 
       // Check if this is a source directory (has 'src' subdirectory)
-      const srcDir = path.join(bmadDir, 'src');
+      const srcDir = path.join(wtkDir, 'src');
       if (await fs.pathExists(srcDir)) {
         // Source directory structure: src/core-skills or src/bmm-skills
         if (module === 'core') {
@@ -202,7 +202,7 @@ class DependencyResolver {
       for (const ref of fileRefs) {
         // Determine type based on path format
         // Paths starting with bmad/ are absolute references to the bmad installation
-        const depType = ref.startsWith('bmad/') ? 'bmad-path' : 'file';
+        const depType = ref.startsWith('wtk/') || ref.startsWith('bmad/') ? 'wtk-path' : 'file';
         allDeps.add({
           from: file.path,
           dependency: ref,
@@ -221,15 +221,15 @@ class DependencyResolver {
     const refs = new Set();
 
     // Match @task-{name} or @agent-{name} or @{module}-{type}-{name}
-    const commandPattern = /@(task-|agent-|bmad-)([a-z0-9-]+)/g;
+    const commandPattern = /@(task-|agent-|wtk-)([a-z0-9-]+)/g;
     let match;
 
     while ((match = commandPattern.exec(content)) !== null) {
       refs.add(match[0]);
     }
 
-    // Match file paths like bmad/core/agents/analyst
-    const pathPattern = /bmad\/(core|bmm|cis)\/(agents|tasks)\/([a-z0-9-]+)/g;
+    // Match file paths like wtk/core/agents/analyst (or legacy bmad/)
+    const pathPattern = /(?:wtk|bmad)\/(core|bmm|cis)\/(agents|tasks)\/([a-z0-9-]+)/g;
 
     while ((match = pathPattern.exec(content)) !== null) {
       refs.add(match[0]);
@@ -258,7 +258,7 @@ class DependencyResolver {
       let execPath = match[1];
       if (execPath && execPath !== '*') {
         // Remove {project-root} prefix to get the actual path
-        // Usage is like {project-root}/bmad/core/tasks/foo.md
+        // Usage is like {project-root}/_wtk/core/tasks/foo.md
         if (execPath.includes('{project-root}')) {
           execPath = execPath.replace('{project-root}', '');
         }
@@ -272,7 +272,7 @@ class DependencyResolver {
       let tmplPath = match[1];
       if (tmplPath && tmplPath !== '*') {
         // Remove {project-root} prefix to get the actual path
-        // Usage is like {project-root}/bmad/core/tasks/foo.md
+        // Usage is like {project-root}/_wtk/core/tasks/foo.md
         if (tmplPath.includes('{project-root}')) {
           tmplPath = tmplPath.replace('{project-root}', '');
         }
@@ -286,11 +286,11 @@ class DependencyResolver {
   /**
    * Resolve dependency paths to actual files
    */
-  async resolveDependencyPaths(bmadDir, dependencies) {
+  async resolveDependencyPaths(wtkDir, dependencies) {
     const resolved = new Set();
 
     for (const dep of dependencies) {
-      const resolvedPaths = await this.resolveSingleDependency(bmadDir, dep);
+      const resolvedPaths = await this.resolveSingleDependency(wtkDir, dep);
       for (const path of resolvedPaths) {
         resolved.add(path);
       }
@@ -302,7 +302,7 @@ class DependencyResolver {
   /**
    * Resolve a single dependency to file paths
    */
-  async resolveSingleDependency(bmadDir, dep) {
+  async resolveSingleDependency(wtkDir, dep) {
     const paths = [];
 
     switch (dep.type) {
@@ -315,7 +315,7 @@ class DependencyResolver {
           // Remove {project-root} and resolve as bmad path
           depPath = depPath.replace('{project-root}', '');
 
-          if (depPath.startsWith('bmad/')) {
+          if (depPath.startsWith('wtk/') || depPath.startsWith('bmad/')) {
             const bmadPath = depPath.replace(/^bmad\//, '');
 
             // Handle glob patterns
@@ -328,9 +328,9 @@ class DependencyResolver {
 
               let basePath;
               if (module === 'core') {
-                basePath = path.join(bmadDir, 'core', middlePath);
+                basePath = path.join(wtkDir, 'core', middlePath);
               } else {
-                basePath = path.join(bmadDir, 'modules', module, middlePath);
+                basePath = path.join(wtkDir, 'modules', module, middlePath);
               }
 
               if (await fs.pathExists(basePath)) {
@@ -342,7 +342,7 @@ class DependencyResolver {
             } else {
               // Direct path
               if (bmadPath.startsWith('core/')) {
-                const corePath = path.join(bmadDir, bmadPath);
+                const corePath = path.join(wtkDir, bmadPath);
                 if (await fs.pathExists(corePath)) {
                   paths.push(corePath);
                 }
@@ -350,7 +350,7 @@ class DependencyResolver {
                 const parts = bmadPath.split('/');
                 const module = parts[0];
                 const rest = parts.slice(1).join('/');
-                const modulePath = path.join(bmadDir, 'modules', module, rest);
+                const modulePath = path.join(wtkDir, 'modules', module, rest);
 
                 if (await fs.pathExists(modulePath)) {
                   paths.push(modulePath);
@@ -388,14 +388,14 @@ class DependencyResolver {
       }
       case 'command': {
         // Resolve command references to actual files
-        const commandPath = await this.resolveCommandToPath(bmadDir, dep.dependency);
+        const commandPath = await this.resolveCommandToPath(wtkDir, dep.dependency);
         if (commandPath) {
           paths.push(commandPath);
         }
 
         break;
       }
-      case 'bmad-path': {
+      case 'wtk-path': {
         // Resolve bmad/ paths (from {project-root}/bmad/... references)
         // These are paths relative to the src directory structure
         const bmadPath = dep.dependency.replace(/^bmad\//, '');
@@ -406,7 +406,7 @@ class DependencyResolver {
         // bmad/cis/agents/bar.md -> src/modules/cis/agents/bar.md
 
         if (bmadPath.startsWith('core/')) {
-          const corePath = path.join(bmadDir, bmadPath);
+          const corePath = path.join(wtkDir, bmadPath);
           if (await fs.pathExists(corePath)) {
             paths.push(corePath);
           } else {
@@ -420,10 +420,10 @@ class DependencyResolver {
           let modulePath;
           if (module === 'bmm') {
             // bmm is directly under src/
-            modulePath = path.join(bmadDir, module, rest);
+            modulePath = path.join(wtkDir, module, rest);
           } else {
             // Other modules are under modules/
-            modulePath = path.join(bmadDir, 'modules', module, rest);
+            modulePath = path.join(wtkDir, 'modules', module, rest);
           }
 
           if (await fs.pathExists(modulePath)) {
@@ -441,15 +441,15 @@ class DependencyResolver {
 
         // Handle {project-root} prefix if present
         if (templateDep.includes('{project-root}')) {
-          // Remove {project-root} and treat as bmad-path
+          // Remove {project-root} and treat as wtk-path
           templateDep = templateDep.replace('{project-root}', '');
 
           // Now resolve as a bmad path
-          if (templateDep.startsWith('bmad/')) {
+          if (templateDep.startsWith('wtk/') || templateDep.startsWith('bmad/')) {
             const bmadPath = templateDep.replace(/^bmad\//, '');
 
             if (bmadPath.startsWith('core/')) {
-              const corePath = path.join(bmadDir, bmadPath);
+              const corePath = path.join(wtkDir, bmadPath);
               if (await fs.pathExists(corePath)) {
                 paths.push(corePath);
               }
@@ -458,7 +458,7 @@ class DependencyResolver {
               const parts = bmadPath.split('/');
               const module = parts[0];
               const rest = parts.slice(1).join('/');
-              const modulePath = path.join(bmadDir, 'modules', module, rest);
+              const modulePath = path.join(wtkDir, 'modules', module, rest);
 
               if (await fs.pathExists(modulePath)) {
                 paths.push(modulePath);
@@ -488,7 +488,7 @@ class DependencyResolver {
   /**
    * Resolve command reference to file path
    */
-  async resolveCommandToPath(bmadDir, command) {
+  async resolveCommandToPath(wtkDir, command) {
     // Parse command format: @task-name or @agent-name or bmad/module/type/name
 
     if (command.startsWith('@task-')) {
@@ -497,8 +497,8 @@ class DependencyResolver {
       for (const module of ['core', 'bmm', 'cis']) {
         const taskPath =
           module === 'core'
-            ? path.join(bmadDir, 'core', 'tasks', `${taskName}.md`)
-            : path.join(bmadDir, 'modules', module, 'tasks', `${taskName}.md`);
+            ? path.join(wtkDir, 'core', 'tasks', `${taskName}.md`)
+            : path.join(wtkDir, 'modules', module, 'tasks', `${taskName}.md`);
         if (await fs.pathExists(taskPath)) {
           return taskPath;
         }
@@ -509,13 +509,13 @@ class DependencyResolver {
       for (const module of ['core', 'bmm', 'cis']) {
         const agentPath =
           module === 'core'
-            ? path.join(bmadDir, 'core', 'agents', `${agentName}.md`)
-            : path.join(bmadDir, 'modules', module, 'agents', `${agentName}.md`);
+            ? path.join(wtkDir, 'core', 'agents', `${agentName}.md`)
+            : path.join(wtkDir, 'modules', module, 'agents', `${agentName}.md`);
         if (await fs.pathExists(agentPath)) {
           return agentPath;
         }
       }
-    } else if (command.startsWith('bmad/')) {
+    } else if (command.startsWith('wtk/') || command.startsWith('bmad/')) {
       // Direct path reference
       const parts = command.split('/');
       if (parts.length >= 4) {
@@ -526,7 +526,7 @@ class DependencyResolver {
         const fileName = name.endsWith('.md') ? name : `${name}.md`;
 
         const filePath =
-          module === 'core' ? path.join(bmadDir, 'core', type, fileName) : path.join(bmadDir, 'modules', module, type, fileName);
+          module === 'core' ? path.join(wtkDir, 'core', type, fileName) : path.join(wtkDir, 'modules', module, type, fileName);
         if (await fs.pathExists(filePath)) {
           return filePath;
         }
@@ -544,7 +544,7 @@ class DependencyResolver {
   /**
    * Resolve transitive dependencies (dependencies of dependencies)
    */
-  async resolveTransitiveDependencies(bmadDir, directDeps) {
+  async resolveTransitiveDependencies(wtkDir, directDeps) {
     const transitive = new Set();
     const processed = new Set();
 
@@ -560,12 +560,12 @@ class DependencyResolver {
           {
             path: depPath,
             type: 'dependency',
-            module: this.getModuleFromPath(bmadDir, depPath),
+            module: this.getModuleFromPath(wtkDir, depPath),
             name: path.basename(depPath),
           },
         ]);
 
-        const resolvedSubDeps = await this.resolveDependencyPaths(bmadDir, subDeps);
+        const resolvedSubDeps = await this.resolveDependencyPaths(wtkDir, subDeps);
         for (const subDep of resolvedSubDeps) {
           if (!directDeps.has(subDep)) {
             transitive.add(subDep);
@@ -580,8 +580,8 @@ class DependencyResolver {
   /**
    * Get module name from file path
    */
-  getModuleFromPath(bmadDir, filePath) {
-    const relative = path.relative(bmadDir, filePath);
+  getModuleFromPath(wtkDir, filePath) {
+    const relative = path.relative(wtkDir, filePath);
     const parts = relative.split(path.sep);
 
     // Handle source directory structure (src/core-skills, src/bmm-skills, or src/modules/xxx)
@@ -611,11 +611,11 @@ class DependencyResolver {
   /**
    * Organize files by module
    */
-  organizeByModule(bmadDir, files) {
+  organizeByModule(wtkDir, files) {
     const organized = {};
 
     for (const file of files) {
-      const module = this.getModuleFromPath(bmadDir, file);
+      const module = this.getModuleFromPath(wtkDir, file);
       if (!organized[module]) {
         organized[module] = {
           agents: [],
@@ -633,12 +633,12 @@ class DependencyResolver {
       // Check if file is in source directory structure
       if (file.includes('/src/core-skills/') || file.includes('/src/bmm-skills/')) {
         if (module === 'core') {
-          moduleBase = path.join(bmadDir, 'src', 'core-skills');
+          moduleBase = path.join(wtkDir, 'src', 'core-skills');
         } else if (module === 'bmm') {
-          moduleBase = path.join(bmadDir, 'src', 'bmm-skills');
+          moduleBase = path.join(wtkDir, 'src', 'bmm-skills');
         }
       } else {
-        moduleBase = module === 'core' ? path.join(bmadDir, 'core') : path.join(bmadDir, 'modules', module);
+        moduleBase = module === 'core' ? path.join(wtkDir, 'core') : path.join(wtkDir, 'modules', module);
       }
 
       const relative = path.relative(moduleBase, file);

@@ -6,10 +6,10 @@ const { XmlHandler } = require('../../../lib/xml-handler');
 const { getProjectRoot, getSourcePath, getModulePath } = require('../../../lib/project-root');
 const { filterCustomizationData } = require('../../../lib/agent/compiler');
 const { ExternalModuleManager } = require('./external-manager');
-const { BMAD_FOLDER_NAME } = require('../ide/shared/path-utils');
+const { WTK_FOLDER_NAME } = require('../ide/shared/path-utils');
 
 /**
- * Manages the installation, updating, and removal of BMAD modules.
+ * Manages the installation, updating, and removal of WTK modules.
  * Handles module discovery, dependency resolution, configuration processing,
  * and agent file management including XML activation block injection.
  *
@@ -27,17 +27,17 @@ const { BMAD_FOLDER_NAME } = require('../ide/shared/path-utils');
 class ModuleManager {
   constructor(options = {}) {
     this.xmlHandler = new XmlHandler();
-    this.bmadFolderName = BMAD_FOLDER_NAME; // Default, can be overridden
+    this.wtkFolderName = WTK_FOLDER_NAME; // Default, can be overridden
     this.customModulePaths = new Map(); // Initialize custom module paths
     this.externalModuleManager = new ExternalModuleManager(); // For external official modules
   }
 
   /**
    * Set the bmad folder name for placeholder replacement
-   * @param {string} bmadFolderName - The bmad folder name
+   * @param {string} wtkFolderName - The bmad folder name
    */
-  setBmadFolderName(bmadFolderName) {
-    this.bmadFolderName = bmadFolderName;
+  setWtkFolderName(wtkFolderName) {
+    this.wtkFolderName = wtkFolderName;
   }
 
   /**
@@ -89,15 +89,15 @@ class ModuleManager {
   }
 
   /**
-   * Copy sidecar directory to _bmad/_memory location with update-safe handling
+   * Copy sidecar directory to _wtk/_memory location with update-safe handling
    * @param {string} sourceSidecarPath - Source sidecar directory path
    * @param {string} agentName - Name of the agent (for naming)
-   * @param {string} bmadMemoryPath - This should ALWAYS be _bmad/_memory
+   * @param {string} bmadMemoryPath - This should ALWAYS be _wtk/_memory
    * @param {boolean} isUpdate - Whether this is an update (default: false)
-   * @param {string} bmadDir - BMAD installation directory
+   * @param {string} wtkDir - WTK installation directory
    * @param {Object} installer - Installer instance for file tracking
    */
-  async copySidecarToMemory(sourceSidecarPath, agentName, bmadMemoryPath, isUpdate = false, bmadDir = null, installer = null) {
+  async copySidecarToMemory(sourceSidecarPath, agentName, bmadMemoryPath, isUpdate = false, wtkDir = null, installer = null) {
     const crypto = require('node:crypto');
     const sidecarTargetDir = path.join(bmadMemoryPath, `${agentName}-sidecar`);
 
@@ -108,7 +108,7 @@ class ModuleManager {
     // Get existing files manifest for update checking
     let existingFilesManifest = [];
     if (isUpdate && installer) {
-      existingFilesManifest = await installer.readFilesManifest(bmadDir);
+      existingFilesManifest = await installer.readFilesManifest(wtkDir);
     }
 
     // Build map of existing sidecar files with their hashes
@@ -150,26 +150,26 @@ class ModuleManager {
           if (currentTargetHash === lastKnownHash) {
             // File hasn't been modified by user, safe to update
             await this.copyFileWithPlaceholderReplacement(sourceFilePath, targetFilePath, true);
-            if (process.env.BMAD_VERBOSE_INSTALL === 'true') {
+            if (process.env.WTK_VERBOSE_INSTALL === 'true') {
               await prompts.log.message(`    Updated sidecar file: ${relativeToBmad}`);
             }
           } else {
             // User has modified the file, preserve it
-            if (process.env.BMAD_VERBOSE_INSTALL === 'true') {
+            if (process.env.WTK_VERBOSE_INSTALL === 'true') {
               await prompts.log.message(`    Preserving user-modified file: ${relativeToBmad}`);
             }
           }
         } else {
           // First time seeing this file in manifest, copy it
           await this.copyFileWithPlaceholderReplacement(sourceFilePath, targetFilePath, true);
-          if (process.env.BMAD_VERBOSE_INSTALL === 'true') {
+          if (process.env.WTK_VERBOSE_INSTALL === 'true') {
             await prompts.log.message(`    Added new sidecar file: ${relativeToBmad}`);
           }
         }
       } else {
         // New installation
         await this.copyFileWithPlaceholderReplacement(sourceFilePath, targetFilePath, true);
-        if (process.env.BMAD_VERBOSE_INSTALL === 'true') {
+        if (process.env.WTK_VERBOSE_INSTALL === 'true') {
           await prompts.log.message(`    Copied sidecar file: ${relativeToBmad}`);
         }
       }
@@ -205,8 +205,8 @@ class ModuleManager {
     }
 
     // Check for cached custom modules in _config/custom/
-    if (this.bmadDir) {
-      const customCacheDir = path.join(this.bmadDir, '_config', 'custom');
+    if (this.wtkDir) {
+      const customCacheDir = path.join(this.wtkDir, '_config', 'custom');
       if (await fs.pathExists(customCacheDir)) {
         const cacheEntries = await fs.readdir(customCacheDir, { withFileTypes: true });
         for (const entry of cacheEntries) {
@@ -260,7 +260,7 @@ class ModuleManager {
         .split('-')
         .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
         .join(' '),
-      description: 'BMAD Module',
+      description: 'WTK Module',
       version: '5.0.0',
       source: sourceDescription,
       isCustom: configPath === rootCustomConfigPath || isCustomSource,
@@ -514,16 +514,16 @@ class ModuleManager {
   /**
    * Install a module
    * @param {string} moduleName - Code of the module to install (from module.yaml)
-   * @param {string} bmadDir - Target bmad directory
+   * @param {string} wtkDir - Target bmad directory
    * @param {Function} fileTrackingCallback - Optional callback to track installed files
    * @param {Object} options - Additional installation options
    * @param {Array<string>} options.installedIDEs - Array of IDE codes that were installed
    * @param {Object} options.moduleConfig - Module configuration from config collector
    * @param {Object} options.logger - Logger instance for output
    */
-  async install(moduleName, bmadDir, fileTrackingCallback = null, options = {}) {
+  async install(moduleName, wtkDir, fileTrackingCallback = null, options = {}) {
     const sourcePath = await this.findModuleSource(moduleName, { silent: options.silent });
-    const targetPath = path.join(bmadDir, moduleName);
+    const targetPath = path.join(wtkDir, moduleName);
 
     // Check if source module exists
     if (!sourcePath) {
@@ -567,22 +567,22 @@ class ModuleManager {
     await this.copyModuleWithFiltering(sourcePath, targetPath, fileTrackingCallback, options.moduleConfig);
 
     // Compile any .agent.yaml files to .md format
-    await this.compileModuleAgents(sourcePath, targetPath, moduleName, bmadDir, options.installer);
+    await this.compileModuleAgents(sourcePath, targetPath, moduleName, wtkDir, options.installer);
 
     // Process agent files to inject activation block
     await this.processAgentFiles(targetPath, moduleName);
 
     // Create directories declared in module.yaml (unless explicitly skipped)
     if (!options.skipModuleInstaller) {
-      await this.createModuleDirectories(moduleName, bmadDir, options);
+      await this.createModuleDirectories(moduleName, wtkDir, options);
     }
 
     // Capture version info for manifest
     const { Manifest } = require('../core/manifest');
     const manifestObj = new Manifest();
-    const versionInfo = await manifestObj.getModuleVersionInfo(moduleName, bmadDir, sourcePath);
+    const versionInfo = await manifestObj.getModuleVersionInfo(moduleName, wtkDir, sourcePath);
 
-    await manifestObj.addModule(bmadDir, moduleName, {
+    await manifestObj.addModule(wtkDir, moduleName, {
       version: versionInfo.version,
       source: versionInfo.source,
       npmPackage: versionInfo.npmPackage,
@@ -600,12 +600,12 @@ class ModuleManager {
   /**
    * Update an existing module
    * @param {string} moduleName - Name of the module to update
-   * @param {string} bmadDir - Target bmad directory
+   * @param {string} wtkDir - Target bmad directory
    * @param {boolean} force - Force update (overwrite modifications)
    */
-  async update(moduleName, bmadDir, force = false, options = {}) {
+  async update(moduleName, wtkDir, force = false, options = {}) {
     const sourcePath = await this.findModuleSource(moduleName);
-    const targetPath = path.join(bmadDir, moduleName);
+    const targetPath = path.join(wtkDir, moduleName);
 
     // Check if source module exists
     if (!sourcePath) {
@@ -620,13 +620,13 @@ class ModuleManager {
     if (force) {
       // Force update - remove and reinstall
       await fs.remove(targetPath);
-      return await this.install(moduleName, bmadDir, null, { installer: options.installer });
+      return await this.install(moduleName, wtkDir, null, { installer: options.installer });
     } else {
       // Selective update - preserve user modifications
       await this.syncModule(sourcePath, targetPath);
 
       // Recompile agents (#1133)
-      await this.compileModuleAgents(sourcePath, targetPath, moduleName, bmadDir, options.installer);
+      await this.compileModuleAgents(sourcePath, targetPath, moduleName, wtkDir, options.installer);
       await this.processAgentFiles(targetPath, moduleName);
     }
 
@@ -640,10 +640,10 @@ class ModuleManager {
   /**
    * Remove a module
    * @param {string} moduleName - Name of the module to remove
-   * @param {string} bmadDir - Target bmad directory
+   * @param {string} wtkDir - Target bmad directory
    */
-  async remove(moduleName, bmadDir) {
-    const targetPath = path.join(bmadDir, moduleName);
+  async remove(moduleName, wtkDir) {
+    const targetPath = path.join(wtkDir, moduleName);
 
     if (!(await fs.pathExists(targetPath))) {
       throw new Error(`Module '${moduleName}' is not installed`);
@@ -660,22 +660,22 @@ class ModuleManager {
   /**
    * Check if a module is installed
    * @param {string} moduleName - Name of the module
-   * @param {string} bmadDir - Target bmad directory
+   * @param {string} wtkDir - Target bmad directory
    * @returns {boolean} True if module is installed
    */
-  async isInstalled(moduleName, bmadDir) {
-    const targetPath = path.join(bmadDir, moduleName);
+  async isInstalled(moduleName, wtkDir) {
+    const targetPath = path.join(wtkDir, moduleName);
     return await fs.pathExists(targetPath);
   }
 
   /**
    * Get installed module info
    * @param {string} moduleName - Name of the module
-   * @param {string} bmadDir - Target bmad directory
+   * @param {string} wtkDir - Target bmad directory
    * @returns {Object|null} Module info or null if not installed
    */
-  async getInstalledInfo(moduleName, bmadDir) {
-    const targetPath = path.join(bmadDir, moduleName);
+  async getInstalledInfo(moduleName, wtkDir) {
+    const targetPath = path.join(wtkDir, moduleName);
 
     if (!(await fs.pathExists(targetPath))) {
       return null;
@@ -778,13 +778,13 @@ class ModuleManager {
    * @param {string} sourcePath - Source module path
    * @param {string} targetPath - Target module path
    * @param {string} moduleName - Module name
-   * @param {string} bmadDir - BMAD installation directory
+   * @param {string} wtkDir - WTK installation directory
    * @param {Object} installer - Installer instance for file tracking
    */
-  async compileModuleAgents(sourcePath, targetPath, moduleName, bmadDir, installer = null) {
+  async compileModuleAgents(sourcePath, targetPath, moduleName, wtkDir, installer = null) {
     const sourceAgentsPath = path.join(sourcePath, 'agents');
     const targetAgentsPath = path.join(targetPath, 'agents');
-    const cfgAgentsDir = path.join(bmadDir, '_config', 'agents');
+    const cfgAgentsDir = path.join(wtkDir, '_config', 'agents');
 
     // Check if agents directory exists in source
     if (!(await fs.pathExists(sourceAgentsPath))) {
@@ -819,7 +819,7 @@ class ModuleManager {
           if (await fs.pathExists(genericTemplatePath)) {
             await this.copyFileWithPlaceholderReplacement(genericTemplatePath, customizePath);
             // Only show customize creation in verbose mode
-            if (process.env.BMAD_VERBOSE_INSTALL === 'true') {
+            if (process.env.WTK_VERBOSE_INSTALL === 'true') {
               await prompts.log.message(`  Created customize: ${moduleName}-${agentName}.customize.yaml`);
             }
 
@@ -829,7 +829,7 @@ class ModuleManager {
             const originalHash = crypto.createHash('sha256').update(customizeContent).digest('hex');
 
             // Store in main manifest
-            const manifestPath = path.join(bmadDir, '_config', 'manifest.yaml');
+            const manifestPath = path.join(wtkDir, '_config', 'manifest.yaml');
             let manifestData = {};
             if (await fs.pathExists(manifestPath)) {
               const manifestContent = await fs.readFile(manifestPath, 'utf8');
@@ -839,7 +839,7 @@ class ModuleManager {
             if (!manifestData.agentCustomizations) {
               manifestData.agentCustomizations = {};
             }
-            manifestData.agentCustomizations[path.relative(bmadDir, customizePath)] = originalHash;
+            manifestData.agentCustomizations[path.relative(wtkDir, customizePath)] = originalHash;
 
             // Write back to manifest
             const yaml = require('yaml');
@@ -910,19 +910,19 @@ class ModuleManager {
 
           // Check if sidecar directory exists
           if (await fs.pathExists(sourceSidecarPath)) {
-            // Memory is always in _bmad/_memory
-            const bmadMemoryPath = path.join(bmadDir, '_memory');
+            // Memory is always in _wtk/_memory
+            const bmadMemoryPath = path.join(wtkDir, '_memory');
 
             // Determine if this is an update (by checking if agent already exists)
             const isUpdate = await fs.pathExists(targetMdPath);
 
             // Copy sidecar to memory location with update-safe handling
-            const copiedFiles = await this.copySidecarToMemory(sourceSidecarPath, agentName, bmadMemoryPath, isUpdate, bmadDir, installer);
+            const copiedFiles = await this.copySidecarToMemory(sourceSidecarPath, agentName, bmadMemoryPath, isUpdate, wtkDir, installer);
 
-            if (process.env.BMAD_VERBOSE_INSTALL === 'true' && copiedFiles.length > 0) {
+            if (process.env.WTK_VERBOSE_INSTALL === 'true' && copiedFiles.length > 0) {
               await prompts.log.message(`    Sidecar files processed: ${copiedFiles.length} files`);
             }
-          } else if (process.env.BMAD_VERBOSE_INSTALL === 'true') {
+          } else if (process.env.WTK_VERBOSE_INSTALL === 'true') {
             await prompts.log.warn(`    Agent marked as having sidecar but ${sidecarDirName} directory not found`);
           }
         }
@@ -941,7 +941,7 @@ class ModuleManager {
         }
 
         // Only show compilation details in verbose mode
-        if (process.env.BMAD_VERBOSE_INSTALL === 'true') {
+        if (process.env.WTK_VERBOSE_INSTALL === 'true') {
           await prompts.log.message(
             `    Compiled agent: ${agentName} -> ${path.relative(targetPath, targetMdPath)}${hasSidecar ? ' (with sidecar)' : ''}`,
           );
@@ -1078,8 +1078,8 @@ class ModuleManager {
         const installWorkflowPath = item['workflow-install']; // Where to copy TO
 
         // Parse SOURCE workflow path
-        // Example: {project-root}/_bmad/bmm/workflows/4-implementation/bmad-create-story/workflow.md
-        const sourceMatch = sourceWorkflowPath.match(/\{project-root\}\/(?:_bmad)\/([^/]+)\/workflows\/(.+)/);
+        // Example: {project-root}/_wtk/bmm/workflows/4-implementation/wtk-create-story/workflow.md
+        const sourceMatch = sourceWorkflowPath.match(/\{project-root\}\/(?:_wtk)\/([^/]+)\/workflows\/(.+)/);
         if (!sourceMatch) {
           await prompts.log.warn(`      Could not parse workflow path: ${sourceWorkflowPath}`);
           continue;
@@ -1088,8 +1088,8 @@ class ModuleManager {
         const [, sourceModule, sourceWorkflowSubPath] = sourceMatch;
 
         // Parse INSTALL workflow path
-        // Example: {project-root}/_bmad/bmgd/workflows/4-production/create-story/workflow.md
-        const installMatch = installWorkflowPath.match(/\{project-root\}\/(?:_bmad)\/([^/]+)\/workflows\/(.+)/);
+        // Example: {project-root}/_wtk/bmgd/workflows/4-production/create-story/workflow.md
+        const installMatch = installWorkflowPath.match(/\{project-root\}\/(?:_wtk)\/([^/]+)\/workflows\/(.+)/);
         if (!installMatch) {
           await prompts.log.warn(`      Could not parse workflow-install path: ${installWorkflowPath}`);
           continue;
@@ -1129,17 +1129,17 @@ class ModuleManager {
    * This replaces the security-risky module installer pattern with declarative config
    * During updates, if a directory path changed, moves the old directory to the new path
    * @param {string} moduleName - Name of the module
-   * @param {string} bmadDir - Target bmad directory
+   * @param {string} wtkDir - Target bmad directory
    * @param {Object} options - Installation options
    * @param {Object} options.moduleConfig - Module configuration from config collector
    * @param {Object} options.existingModuleConfig - Previous module config (for detecting path changes during updates)
    * @param {Object} options.coreConfig - Core configuration
    * @returns {Promise<{createdDirs: string[], movedDirs: string[], createdWdsFolders: string[]}>} Created directories info
    */
-  async createModuleDirectories(moduleName, bmadDir, options = {}) {
+  async createModuleDirectories(moduleName, wtkDir, options = {}) {
     const moduleConfig = options.moduleConfig || {};
     const existingModuleConfig = options.existingModuleConfig || {};
-    const projectRoot = path.dirname(bmadDir);
+    const projectRoot = path.dirname(wtkDir);
     const emptyResult = { createdDirs: [], movedDirs: [], createdWdsFolders: [] };
 
     // Special handling for core module - it's in src/core-skills not src/modules
@@ -1309,7 +1309,7 @@ class ModuleManager {
         let configContent = await fs.readFile(configPath, 'utf8');
 
         // Replace path placeholders
-        configContent = configContent.replaceAll('{project-root}', `bmad/${moduleName}`);
+        configContent = configContent.replaceAll('{project-root}', `_wtk/${moduleName}`);
         configContent = configContent.replaceAll('{module}', moduleName);
 
         await fs.writeFile(configPath, configContent, 'utf8');

@@ -4,7 +4,7 @@
 # ///
 
 #!/usr/bin/env python3
-"""Unit tests for bmad_init.py"""
+"""Unit tests for wtk_init.py"""
 
 import json
 import os
@@ -16,7 +16,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from bmad_init import (
+from wtk_init import (
     find_project_root,
     parse_var_specs,
     resolve_project_root_placeholder,
@@ -32,10 +32,10 @@ from bmad_init import (
 
 class TestFindProjectRoot(unittest.TestCase):
 
-    def test_finds_bmad_folder(self):
+    def test_finds_wtk_folder(self):
         temp_dir = tempfile.mkdtemp()
         try:
-            (Path(temp_dir) / '_bmad').mkdir()
+            (Path(temp_dir) / '_wtk').mkdir()
             original_cwd = os.getcwd()
             try:
                 os.chdir(temp_dir)
@@ -46,17 +46,17 @@ class TestFindProjectRoot(unittest.TestCase):
         finally:
             shutil.rmtree(temp_dir)
 
-    def test_llm_provided_with_bmad(self):
+    def test_llm_provided_with_wtk(self):
         temp_dir = tempfile.mkdtemp()
         try:
-            (Path(temp_dir) / '_bmad').mkdir()
+            (Path(temp_dir) / '_wtk').mkdir()
             result = find_project_root(llm_provided=temp_dir)
             self.assertEqual(result.resolve(), Path(temp_dir).resolve())
         finally:
             shutil.rmtree(temp_dir)
 
-    def test_llm_provided_without_bmad_still_returns_dir(self):
-        """First-run case: LLM provides path but _bmad doesn't exist yet."""
+    def test_llm_provided_without_wtk_still_returns_dir(self):
+        """First-run case: LLM provides path but _wtk doesn't exist yet."""
         temp_dir = tempfile.mkdtemp()
         try:
             result = find_project_root(llm_provided=temp_dir)
@@ -120,9 +120,9 @@ class TestExpandTemplate(unittest.TestCase):
     def test_multiple_placeholders(self):
         result = expand_template(
             '{output_folder}/planning',
-            {'output_folder': '_bmad-output', 'project-root': '/test'}
+            {'output_folder': '_wtk-output', 'project-root': '/test'}
         )
-        self.assertEqual(result, '_bmad-output/planning')
+        self.assertEqual(result, '_wtk-output/planning')
 
     def test_none_value(self):
         self.assertIsNone(expand_template(None, {}))
@@ -135,8 +135,8 @@ class TestApplyResultTemplate(unittest.TestCase):
 
     def test_with_result_template(self):
         var_def = {'result': '{project-root}/{value}'}
-        result = apply_result_template(var_def, '_bmad-output', {'project-root': '/test'})
-        self.assertEqual(result, '/test/_bmad-output')
+        result = apply_result_template(var_def, '_wtk-output', {'project-root': '/test'})
+        self.assertEqual(result, '/test/_wtk-output')
 
     def test_without_result_template(self):
         result = apply_result_template({}, 'raw_value', {})
@@ -160,17 +160,17 @@ class TestLoadModuleYaml(unittest.TestCase):
         path = Path(self.temp_dir) / 'module.yaml'
         path.write_text(
             'code: core\n'
-            'name: "BMad Core Module"\n'
+            'name: "Wtk Core Module"\n'
             'header: "Core Config"\n'
             'user_name:\n'
             '  prompt: "What should agents call you?"\n'
-            '  default: "BMad"\n'
+            '  default: "Wtk"\n'
             '  result: "{value}"\n'
         )
         result = load_module_yaml(path)
         self.assertIsNotNone(result)
         self.assertEqual(result['meta']['code'], 'core')
-        self.assertEqual(result['meta']['name'], 'BMad Core Module')
+        self.assertEqual(result['meta']['name'], 'Wtk Core Module')
         self.assertIn('user_name', result['variables'])
         self.assertEqual(result['variables']['user_name']['prompt'], 'What should agents call you?')
 
@@ -178,7 +178,7 @@ class TestLoadModuleYaml(unittest.TestCase):
         path = Path(self.temp_dir) / 'module.yaml'
         path.write_text(
             'code: bmm\n'
-            'name: "BMad Method"\n'
+            'name: "Wtk Method"\n'
             'project_name:\n'
             '  prompt: "Project name?"\n'
             '  default: "{directory_name}"\n'
@@ -234,8 +234,8 @@ class TestFindTargetModuleYaml(unittest.TestCase):
         result = find_target_module_yaml('test', self.project_root, str(skill_path))
         self.assertIsNotNone(result)
 
-    def test_finds_in_bmad_module_dir(self):
-        module_dir = self.project_root / '_bmad' / 'mymod'
+    def test_finds_in_wtk_module_dir(self):
+        module_dir = self.project_root / '_wtk' / 'mymod'
         module_dir.mkdir(parents=True)
         (module_dir / 'module.yaml').write_text('code: mymod\n')
 
@@ -247,15 +247,15 @@ class TestFindTargetModuleYaml(unittest.TestCase):
         self.assertIsNone(result)
 
     def test_skill_path_takes_priority(self):
-        """Skill assets module.yaml takes priority over _bmad/{module}/."""
+        """Skill assets module.yaml takes priority over _wtk/{module}/."""
         skill_path = self.project_root / 'skills' / 'test-skill'
         assets = skill_path / 'assets'
         assets.mkdir(parents=True)
         (assets / 'module.yaml').write_text('code: test\nname: from-skill\n')
 
-        module_dir = self.project_root / '_bmad' / 'test'
+        module_dir = self.project_root / '_wtk' / 'test'
         module_dir.mkdir(parents=True)
-        (module_dir / 'module.yaml').write_text('code: test\nname: from-bmad\n')
+        (module_dir / 'module.yaml').write_text('code: test\nname: from-wtk\n')
 
         result = find_target_module_yaml('test', self.project_root, str(skill_path))
         self.assertTrue('assets' in str(result))
@@ -285,23 +285,23 @@ class TestLoadModuleConfig(unittest.TestCase):
     def setUp(self):
         self.temp_dir = tempfile.mkdtemp()
         self.project_root = Path(self.temp_dir)
-        bmad_core = self.project_root / '_bmad' / 'core'
+        bmad_core = self.project_root / '_wtk' / 'core'
         bmad_core.mkdir(parents=True)
         (bmad_core / 'config.yaml').write_text(
             'user_name: TestUser\n'
             'communication_language: English\n'
             'document_output_language: English\n'
-            'output_folder: "{project-root}/_bmad-output"\n'
+            'output_folder: "{project-root}/_wtk-output"\n'
         )
-        bmad_bmb = self.project_root / '_bmad' / 'bmb'
+        bmad_bmb = self.project_root / '_wtk' / 'bmb'
         bmad_bmb.mkdir(parents=True)
         (bmad_bmb / 'config.yaml').write_text(
             'user_name: TestUser\n'
             'communication_language: English\n'
             'document_output_language: English\n'
-            'output_folder: "{project-root}/_bmad-output"\n'
-            'bmad_builder_output_folder: "{project-root}/_bmad-output/skills"\n'
-            'bmad_builder_reports: "{project-root}/_bmad-output/reports"\n'
+            'output_folder: "{project-root}/_wtk-output"\n'
+            'bmad_builder_output_folder: "{project-root}/_wtk-output/skills"\n'
+            'bmad_builder_reports: "{project-root}/_wtk-output/reports"\n'
         )
 
     def tearDown(self):

@@ -1,5 +1,5 @@
 ---
-name: bmad-edit-prd
+name: wtk-edit-prd
 description: 'Edit an existing PRD. Use when the user says "edit this PRD".'
 ---
 

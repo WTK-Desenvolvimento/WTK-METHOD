@@ -1,6 +1,6 @@
-# BMAD Method Documentation Site
+# WTK Method Documentation Site
 
-This directory contains the Astro + Starlight configuration for the BMAD Method documentation site.
+This directory contains the Astro + Starlight configuration for the WTK Method documentation site.
 
 ## Architecture
 

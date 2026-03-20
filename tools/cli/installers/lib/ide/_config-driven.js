@@ -12,7 +12,7 @@ const csv = require('csv-parse/sync');
 /**
  * Config-driven IDE setup handler
  *
- * This class provides a standardized way to install BMAD artifacts to IDEs
+ * This class provides a standardized way to install WTK artifacts to IDEs
  * based on configuration in platform-codes.yaml. It eliminates the need for
  * individual installer files for each IDE.
  *
@@ -36,7 +36,7 @@ class ConfigDrivenIdeSetup extends BaseIdeSetup {
 
   /**
    * Detect whether this IDE already has configuration in the project.
-   * For skill_format platforms, checks for bmad-prefixed entries in target_dir
+   * For skill_format platforms, checks for wtk-prefixed entries in target_dir
    * (matching old codex.js behavior) instead of just checking directory existence.
    * @param {string} projectDir - Project directory
    * @returns {Promise<boolean>}
@@ -47,7 +47,7 @@ class ConfigDrivenIdeSetup extends BaseIdeSetup {
       if (await fs.pathExists(dir)) {
         try {
           const entries = await fs.readdir(dir);
-          return entries.some((e) => typeof e === 'string' && e.startsWith('bmad'));
+          return entries.some((e) => typeof e === 'string' && e.startsWith('wtk'));
         } catch {
           return false;
         }
@@ -60,20 +60,20 @@ class ConfigDrivenIdeSetup extends BaseIdeSetup {
   /**
    * Main setup method - called by IdeManager
    * @param {string} projectDir - Project directory
-   * @param {string} bmadDir - BMAD installation directory
+   * @param {string} wtkDir - WTK installation directory
    * @param {Object} options - Setup options
    * @returns {Promise<Object>} Setup result
    */
-  async setup(projectDir, bmadDir, options = {}) {
-    // Check for BMAD files in ancestor directories that would cause duplicates
+  async setup(projectDir, wtkDir, options = {}) {
+    // Check for WTK files in ancestor directories that would cause duplicates
     if (this.installerConfig?.ancestor_conflict_check) {
       const conflict = await this.findAncestorConflict(projectDir);
       if (conflict) {
         await prompts.log.error(
-          `Found existing BMAD skills in ancestor installation: ${conflict}\n` +
+          `Found existing WTK skills in ancestor installation: ${conflict}\n` +
             `  ${this.name} inherits skills from parent directories, so this would cause duplicates.\n` +
-            `  Please remove the BMAD files from that directory first:\n` +
-            `    rm -rf "${conflict}"/bmad*`,
+            `  Please remove the WTK files from that directory first:\n` +
+            `    rm -rf "${conflict}"/wtk*`,
         );
         return {
           success: false,
@@ -86,7 +86,7 @@ class ConfigDrivenIdeSetup extends BaseIdeSetup {
 
     if (!options.silent) await prompts.log.info(`Setting up ${this.name}...`);
 
-    // Clean up any old BMAD installation first
+    // Clean up any old WTK installation first
     await this.cleanup(projectDir, options);
 
     if (!this.installerConfig) {
@@ -95,12 +95,12 @@ class ConfigDrivenIdeSetup extends BaseIdeSetup {
 
     // Handle multi-target installations (e.g., GitHub Copilot)
     if (this.installerConfig.targets) {
-      return this.installToMultipleTargets(projectDir, bmadDir, this.installerConfig.targets, options);
+      return this.installToMultipleTargets(projectDir, wtkDir, this.installerConfig.targets, options);
     }
 
     // Handle single-target installations
     if (this.installerConfig.target_dir) {
-      return this.installToTarget(projectDir, bmadDir, this.installerConfig, options);
+      return this.installToTarget(projectDir, wtkDir, this.installerConfig, options);
     }
 
     return { success: false, reason: 'invalid-config' };
@@ -109,12 +109,12 @@ class ConfigDrivenIdeSetup extends BaseIdeSetup {
   /**
    * Install to a single target directory
    * @param {string} projectDir - Project directory
-   * @param {string} bmadDir - BMAD installation directory
+   * @param {string} wtkDir - WTK installation directory
    * @param {Object} config - Installation configuration
    * @param {Object} options - Setup options
    * @returns {Promise<Object>} Installation result
    */
-  async installToTarget(projectDir, bmadDir, config, options) {
+  async installToTarget(projectDir, wtkDir, config, options) {
     const { target_dir, template_type, artifact_types } = config;
 
     // Skip targets with explicitly empty artifact_types and no verbatim skills
@@ -135,22 +135,22 @@ class ConfigDrivenIdeSetup extends BaseIdeSetup {
     if (!skipStandardArtifacts) {
       // Install agents
       if (!artifact_types || artifact_types.includes('agents')) {
-        const agentGen = new AgentCommandGenerator(this.bmadFolderName);
-        const { artifacts } = await agentGen.collectAgentArtifacts(bmadDir, selectedModules);
+        const agentGen = new AgentCommandGenerator(this.wtkFolderName);
+        const { artifacts } = await agentGen.collectAgentArtifacts(wtkDir, selectedModules);
         results.agents = await this.writeAgentArtifacts(targetPath, artifacts, template_type, config);
       }
 
       // Install workflows
       if (!artifact_types || artifact_types.includes('workflows')) {
-        const workflowGen = new WorkflowCommandGenerator(this.bmadFolderName);
-        const { artifacts } = await workflowGen.collectWorkflowArtifacts(bmadDir);
+        const workflowGen = new WorkflowCommandGenerator(this.wtkFolderName);
+        const { artifacts } = await workflowGen.collectWorkflowArtifacts(wtkDir);
         results.workflows = await this.writeWorkflowArtifacts(targetPath, artifacts, template_type, config);
       }
 
       // Install tasks and tools using template system (supports TOML for Gemini, MD for others)
       if (!artifact_types || artifact_types.includes('tasks') || artifact_types.includes('tools')) {
-        const taskToolGen = new TaskToolCommandGenerator(this.bmadFolderName);
-        const { artifacts } = await taskToolGen.collectTaskToolArtifacts(bmadDir);
+        const taskToolGen = new TaskToolCommandGenerator(this.wtkFolderName);
+        const { artifacts } = await taskToolGen.collectTaskToolArtifacts(wtkDir);
         const taskToolResult = await this.writeTaskToolArtifacts(targetPath, artifacts, template_type, config);
         results.tasks = taskToolResult.tasks || 0;
         results.tools = taskToolResult.tools || 0;
@@ -159,7 +159,7 @@ class ConfigDrivenIdeSetup extends BaseIdeSetup {
 
     // Install verbatim skills (type: skill)
     if (config.skill_format) {
-      results.skills = await this.installVerbatimSkills(projectDir, bmadDir, targetPath, config);
+      results.skills = await this.installVerbatimSkills(projectDir, wtkDir, targetPath, config);
       results.skillDirectories = this.skillWriteTracker ? this.skillWriteTracker.size : 0;
     }
 
@@ -171,16 +171,16 @@ class ConfigDrivenIdeSetup extends BaseIdeSetup {
   /**
    * Install to multiple target directories
    * @param {string} projectDir - Project directory
-   * @param {string} bmadDir - BMAD installation directory
+   * @param {string} wtkDir - WTK installation directory
    * @param {Array} targets - Array of target configurations
    * @param {Object} options - Setup options
    * @returns {Promise<Object>} Installation result
    */
-  async installToMultipleTargets(projectDir, bmadDir, targets, options) {
+  async installToMultipleTargets(projectDir, wtkDir, targets, options) {
     const allResults = { agents: 0, workflows: 0, tasks: 0, tools: 0, skills: 0 };
 
     for (const target of targets) {
-      const result = await this.installToTarget(projectDir, bmadDir, target, options);
+      const result = await this.installToTarget(projectDir, wtkDir, target, options);
       if (result.success) {
         allResults.agents += result.results.agents || 0;
         allResults.workflows += result.results.workflows || 0;
@@ -414,7 +414,7 @@ disable-model-invocation: true
 You must fully embody this agent's persona and follow all activation instructions exactly as specified.
 
 <agent-activation CRITICAL="TRUE">
-1. LOAD the FULL agent file from {project-root}/{{bmadFolderName}}/{{path}}
+1. LOAD the FULL agent file from {project-root}/{{wtkFolderName}}/{{path}}
 2. READ its entire contents - this contains the complete agent persona, menu, and instructions
 3. FOLLOW every step in the <activation> section precisely
 </agent-activation>
@@ -427,7 +427,7 @@ description: '{{description}}'
 
 # {{name}}
 
-LOAD and execute from: {project-root}/{{bmadFolderName}}/{{path}}
+LOAD and execute from: {project-root}/{{wtkFolderName}}/{{path}}
 `;
   }
 
@@ -460,12 +460,12 @@ LOAD and execute from: {project-root}/{{bmadFolderName}}/{{path}}
       // No default
     }
 
-    // Replace _bmad placeholder with actual folder name BEFORE inserting paths,
-    // so that paths containing '_bmad' are not corrupted by the blanket replacement.
-    let rendered = template.replaceAll('_bmad', this.bmadFolderName);
+    // Replace _wtk placeholder with actual folder name BEFORE inserting paths,
+    // so that paths containing '_wtk' are not corrupted by the blanket replacement.
+    let rendered = template.replaceAll('_wtk', this.wtkFolderName);
 
-    // Replace {{bmadFolderName}} placeholder if present
-    rendered = rendered.replaceAll('{{bmadFolderName}}', this.bmadFolderName);
+    // Replace {{wtkFolderName}} placeholder if present
+    rendered = rendered.replaceAll('{{wtkFolderName}}', this.wtkFolderName);
 
     rendered = rendered
       .replaceAll('{{name}}', artifact.name || '')
@@ -561,11 +561,11 @@ LOAD and execute from: {project-root}/{{bmadFolderName}}/{{path}}
     await this.ensureDir(targetPath);
 
     // Build artifact to reuse existing template rendering.
-    // The default-agent template already includes the _bmad/ prefix before {{path}},
-    // but agentPath is relative to project root (e.g. "_bmad/custom/agents/fred.md").
-    // Strip the bmadFolderName prefix so the template doesn't produce a double path.
-    const bmadPrefix = this.bmadFolderName + '/';
-    const normalizedPath = agentPath.startsWith(bmadPrefix) ? agentPath.slice(bmadPrefix.length) : agentPath;
+    // The default-agent template already includes the _wtk/ prefix before {{path}},
+    // but agentPath is relative to project root (e.g. "_wtk/custom/agents/fred.md").
+    // Strip the wtkFolderName prefix so the template doesn't produce a double path.
+    const wtkPrefix = this.wtkFolderName + '/';
+    const normalizedPath = agentPath.startsWith(wtkPrefix) ? agentPath.slice(wtkPrefix.length) : agentPath;
 
     const artifact = {
       type: 'agent-launcher',
@@ -619,7 +619,7 @@ LOAD and execute from: {project-root}/{{bmadFolderName}}/{{path}}
     // This handles any extensions that might slip through toDashPath()
     const baseName = standardName.replace(/\.(md|yaml|yml|json|xml|toml)\.md$/i, '.md');
 
-    // If using default markdown, preserve the bmad-agent- prefix for agents
+    // If using default markdown, preserve the wtk-agent- prefix for agents
     if (extension === '.md') {
       return baseName;
     }
@@ -634,15 +634,15 @@ LOAD and execute from: {project-root}/{{bmadFolderName}}/{{path}}
    * Copies the entire source directory as-is into the IDE skill directory.
    * The source SKILL.md is used directly — no frontmatter transformation or file generation.
    * @param {string} projectDir - Project directory
-   * @param {string} bmadDir - BMAD installation directory
+   * @param {string} wtkDir - WTK installation directory
    * @param {string} targetPath - Target skills directory
    * @param {Object} config - Installation configuration
    * @returns {Promise<number>} Count of skills installed
    */
-  async installVerbatimSkills(projectDir, bmadDir, targetPath, config) {
-    const bmadFolderName = path.basename(bmadDir);
-    const bmadPrefix = bmadFolderName + '/';
-    const csvPath = path.join(bmadDir, '_config', 'skill-manifest.csv');
+  async installVerbatimSkills(projectDir, wtkDir, targetPath, config) {
+    const wtkFolderName = path.basename(wtkDir);
+    const wtkPrefix = wtkFolderName + '/';
+    const csvPath = path.join(wtkDir, '_config', 'skill-manifest.csv');
 
     if (!(await fs.pathExists(csvPath))) return 0;
 
@@ -659,10 +659,10 @@ LOAD and execute from: {project-root}/{{bmadFolderName}}/{{path}}
       if (!canonicalId) continue;
 
       // Derive source directory from path column
-      // path is like "_bmad/bmm/workflows/bmad-quick-flow/bmad-quick-dev-new-preview/SKILL.md"
-      // Strip bmadFolderName prefix and join with bmadDir, then get dirname
-      const relativePath = record.path.startsWith(bmadPrefix) ? record.path.slice(bmadPrefix.length) : record.path;
-      const sourceFile = path.join(bmadDir, relativePath);
+      // path is like "_wtk/bmm/workflows/wtk-quick-flow/wtk-quick-dev-new-preview/SKILL.md"
+      // Strip wtkFolderName prefix and join with wtkDir, then get dirname
+      const relativePath = record.path.startsWith(wtkPrefix) ? record.path.slice(wtkPrefix.length) : record.path;
+      const sourceFile = path.join(wtkDir, relativePath);
       const sourceDir = path.dirname(sourceFile);
 
       if (!(await fs.pathExists(sourceDir))) continue;
@@ -689,11 +689,11 @@ LOAD and execute from: {project-root}/{{bmadFolderName}}/{{path}}
       count++;
     }
 
-    // Post-install cleanup: remove _bmad/ directories for skills with install_to_bmad === "false"
+    // Post-install cleanup: remove _wtk/ directories for skills with install_to_wtk === "false"
     for (const record of records) {
-      if (record.install_to_bmad === 'false') {
-        const relativePath = record.path.startsWith(bmadPrefix) ? record.path.slice(bmadPrefix.length) : record.path;
-        const sourceFile = path.join(bmadDir, relativePath);
+      if (record.install_to_wtk === 'false') {
+        const relativePath = record.path.startsWith(wtkPrefix) ? record.path.slice(wtkPrefix.length) : record.path;
+        const sourceFile = path.join(wtkDir, relativePath);
         const sourceDir = path.dirname(sourceFile);
         if (await fs.pathExists(sourceDir)) {
           await fs.remove(sourceDir);
@@ -738,17 +738,17 @@ LOAD and execute from: {project-root}/{{bmadFolderName}}/{{path}}
       }
     }
 
-    // Strip BMAD markers from copilot-instructions.md if present
+    // Strip WTK markers from copilot-instructions.md if present
     if (this.name === 'github-copilot') {
       await this.cleanupCopilotInstructions(projectDir, options);
     }
 
-    // Strip BMAD modes from .kilocodemodes if present
+    // Strip WTK modes from .kilocodemodes if present
     if (this.name === 'kilo') {
       await this.cleanupKiloModes(projectDir, options);
     }
 
-    // Strip BMAD entries from .rovodev/prompts.yml if present
+    // Strip WTK entries from .rovodev/prompts.yml if present
     if (this.name === 'rovo-dev') {
       await this.cleanupRovoDevPrompts(projectDir, options);
     }
@@ -783,7 +783,7 @@ LOAD and execute from: {project-root}/{{bmadFolderName}}/{{path}}
   }
 
   /**
-   * Warn about stale BMAD files in a global legacy directory (never auto-deletes)
+   * Warn about stale WTK files in a global legacy directory (never auto-deletes)
    * @param {string} legacyDir - Legacy directory path (may start with ~)
    * @param {Object} options - Options (silent, etc.)
    */
@@ -798,10 +798,10 @@ LOAD and execute from: {project-root}/{{bmadFolderName}}/{{path}}
       if (!(await fs.pathExists(expanded))) return;
 
       const entries = await fs.readdir(expanded);
-      const bmadFiles = entries.filter((e) => typeof e === 'string' && e.startsWith('bmad'));
+      const wtkFiles = entries.filter((e) => typeof e === 'string' && e.startsWith('wtk'));
 
-      if (bmadFiles.length > 0 && !options.silent) {
-        await prompts.log.warn(`Found ${bmadFiles.length} stale BMAD file(s) in ${expanded}. Remove manually: rm ${expanded}/bmad-*`);
+      if (wtkFiles.length > 0 && !options.silent) {
+        await prompts.log.warn(`Found ${wtkFiles.length} stale WTK file(s) in ${expanded}. Remove manually: rm ${expanded}/wtk-*`);
       }
     } catch {
       // Errors reading global paths are silently ignored
@@ -820,7 +820,7 @@ LOAD and execute from: {project-root}/{{bmadFolderName}}/{{path}}
       return;
     }
 
-    // Remove all bmad* files
+    // Remove all wtk* command files (excluding wtk-os-*)
     let entries;
     try {
       entries = await fs.readdir(targetPath);
@@ -839,7 +839,7 @@ LOAD and execute from: {project-root}/{{bmadFolderName}}/{{path}}
       if (!entry || typeof entry !== 'string') {
         continue;
       }
-      if (entry.startsWith('bmad') && !entry.startsWith('bmad-os-')) {
+      if (entry.startsWith('wtk') && !entry.startsWith('wtk-os-')) {
         const entryPath = path.join(targetPath, entry);
         try {
           await fs.remove(entryPath);
@@ -851,7 +851,7 @@ LOAD and execute from: {project-root}/{{bmadFolderName}}/{{path}}
     }
 
     if (removedCount > 0 && !options.silent) {
-      await prompts.log.message(`  Cleaned ${removedCount} BMAD files from ${targetDir}`);
+      await prompts.log.message(`  Cleaned ${removedCount} WTK files from ${targetDir}`);
     }
 
     // Remove empty directory after cleanup
@@ -867,8 +867,8 @@ LOAD and execute from: {project-root}/{{bmadFolderName}}/{{path}}
     }
   }
   /**
-   * Strip BMAD-owned content from .github/copilot-instructions.md.
-   * The old custom installer injected content between <!-- BMAD:START --> and <!-- BMAD:END --> markers.
+   * Strip WTK-owned content from .github/copilot-instructions.md.
+   * The old custom installer injected content between <!-- WTK:START --> and <!-- WTK:END --> markers.
    * Deletes the file if nothing remains. Restores .bak backup if one exists.
    */
   async cleanupCopilotInstructions(projectDir, options = {}) {
@@ -878,12 +878,12 @@ LOAD and execute from: {project-root}/{{bmadFolderName}}/{{path}}
 
     try {
       const content = await fs.readFile(filePath, 'utf8');
-      const startIdx = content.indexOf('<!-- BMAD:START -->');
-      const endIdx = content.indexOf('<!-- BMAD:END -->');
+      const startIdx = content.indexOf('<!-- WTK:START -->');
+      const endIdx = content.indexOf('<!-- WTK:END -->');
 
       if (startIdx === -1 || endIdx === -1 || endIdx <= startIdx) return;
 
-      const cleaned = content.slice(0, startIdx) + content.slice(endIdx + '<!-- BMAD:END -->'.length);
+      const cleaned = content.slice(0, startIdx) + content.slice(endIdx + '<!-- WTK:END -->'.length);
 
       if (cleaned.trim().length === 0) {
         await fs.remove(filePath);
@@ -898,16 +898,16 @@ LOAD and execute from: {project-root}/{{bmadFolderName}}/{{path}}
         if (await fs.pathExists(backupPath)) await fs.remove(backupPath);
       }
 
-      if (!options.silent) await prompts.log.message('  Cleaned BMAD markers from copilot-instructions.md');
+      if (!options.silent) await prompts.log.message('  Cleaned WTK markers from copilot-instructions.md');
     } catch {
-      if (!options.silent) await prompts.log.warn('  Warning: Could not clean BMAD markers from copilot-instructions.md');
+      if (!options.silent) await prompts.log.warn('  Warning: Could not clean WTK markers from copilot-instructions.md');
     }
   }
 
   /**
-   * Strip BMAD-owned modes from .kilocodemodes.
-   * The old custom kilo.js installer added modes with slug starting with 'bmad-'.
-   * Parses YAML, filters out BMAD modes, rewrites. Leaves file as-is on parse failure.
+   * Strip WTK-owned modes from .kilocodemodes.
+   * The old custom kilo.js installer added modes with slug starting with 'wtk-'.
+   * Parses YAML, filters out WTK modes, rewrites. Leaves file as-is on parse failure.
    */
   async cleanupKiloModes(projectDir, options = {}) {
     const kiloModesPath = path.join(projectDir, '.kilocodemodes');
@@ -927,13 +927,13 @@ LOAD and execute from: {project-root}/{{bmadFolderName}}/{{path}}
     if (!Array.isArray(config.customModes)) return;
 
     const originalCount = config.customModes.length;
-    config.customModes = config.customModes.filter((mode) => mode && (!mode.slug || !mode.slug.startsWith('bmad-')));
+    config.customModes = config.customModes.filter((mode) => mode && (!mode.slug || !mode.slug.startsWith('wtk-')));
     const removedCount = originalCount - config.customModes.length;
 
     if (removedCount > 0) {
       try {
         await fs.writeFile(kiloModesPath, yaml.stringify(config, { lineWidth: 0 }));
-        if (!options.silent) await prompts.log.message(`  Removed ${removedCount} BMAD modes from .kilocodemodes`);
+        if (!options.silent) await prompts.log.message(`  Removed ${removedCount} WTK modes from .kilocodemodes`);
       } catch {
         if (!options.silent) await prompts.log.warn('  Warning: Could not write .kilocodemodes during cleanup');
       }
@@ -941,9 +941,9 @@ LOAD and execute from: {project-root}/{{bmadFolderName}}/{{path}}
   }
 
   /**
-   * Strip BMAD-owned entries from .rovodev/prompts.yml.
+   * Strip WTK-owned entries from .rovodev/prompts.yml.
    * The old custom rovodev.js installer registered workflows in prompts.yml.
-   * Parses YAML, filters out entries with name starting with 'bmad-', rewrites.
+   * Parses YAML, filters out entries with name starting with 'wtk-', rewrites.
    * Removes the file if no entries remain.
    */
   async cleanupRovoDevPrompts(projectDir, options = {}) {
@@ -964,7 +964,7 @@ LOAD and execute from: {project-root}/{{bmadFolderName}}/{{path}}
     if (!Array.isArray(config.prompts)) return;
 
     const originalCount = config.prompts.length;
-    config.prompts = config.prompts.filter((entry) => entry && (!entry.name || !entry.name.startsWith('bmad-')));
+    config.prompts = config.prompts.filter((entry) => entry && (!entry.name || !entry.name.startsWith('wtk-')));
     const removedCount = originalCount - config.prompts.length;
 
     if (removedCount > 0) {
@@ -974,7 +974,7 @@ LOAD and execute from: {project-root}/{{bmadFolderName}}/{{path}}
         } else {
           await fs.writeFile(promptsPath, yaml.stringify(config, { lineWidth: 0 }));
         }
-        if (!options.silent) await prompts.log.message(`  Removed ${removedCount} BMAD entries from prompts.yml`);
+        if (!options.silent) await prompts.log.message(`  Removed ${removedCount} WTK entries from prompts.yml`);
       } catch {
         if (!options.silent) await prompts.log.warn('  Warning: Could not write prompts.yml during cleanup');
       }
@@ -982,7 +982,7 @@ LOAD and execute from: {project-root}/{{bmadFolderName}}/{{path}}
   }
 
   /**
-   * Check ancestor directories for existing BMAD files in the same target_dir.
+   * Check ancestor directories for existing WTK files in the same target_dir.
    * IDEs like Claude Code inherit commands from parent directories, so an existing
    * installation in an ancestor would cause duplicate commands.
    * @param {string} projectDir - Project directory being installed to
@@ -1001,10 +1001,10 @@ LOAD and execute from: {project-root}/{{bmadFolderName}}/{{path}}
       try {
         if (await fs.pathExists(candidatePath)) {
           const entries = await fs.readdir(candidatePath);
-          const hasBmad = entries.some(
-            (e) => typeof e === 'string' && e.toLowerCase().startsWith('bmad') && !e.toLowerCase().startsWith('bmad-os-'),
+          const hasWtk = entries.some(
+            (e) => typeof e === 'string' && e.toLowerCase().startsWith('wtk') && !e.toLowerCase().startsWith('wtk-os-'),
           );
-          if (hasBmad) {
+          if (hasWtk) {
             return candidatePath;
           }
         }

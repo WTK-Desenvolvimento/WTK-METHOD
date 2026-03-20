@@ -9,7 +9,7 @@ const {
   loadSkillManifest: loadSkillManifestShared,
   getCanonicalId: getCanonicalIdShared,
   getArtifactType: getArtifactTypeShared,
-  getInstallToBmad: getInstallToBmadShared,
+  getInstallToWtk: getInstallToWtkShared,
 } = require('../ide/shared/skill-manifest');
 
 // Load package.json for version info
@@ -46,8 +46,8 @@ class ManifestGenerator {
   }
 
   /** Delegate to shared skill-manifest module */
-  getInstallToBmad(manifest, filename) {
-    return getInstallToBmadShared(manifest, filename);
+  getInstallToWtk(manifest, filename) {
+    return getInstallToWtkShared(manifest, filename);
   }
 
   /**
@@ -61,7 +61,7 @@ class ManifestGenerator {
   }
 
   /**
-   * Check whether a loaded bmad-skill-manifest.yaml declares a native
+   * Check whether a loaded wtk-skill-manifest.yaml declares a native
    * SKILL.md entrypoint, either as a single-entry manifest or a multi-entry map.
    * @param {Object|null} manifest - Loaded manifest
    * @returns {boolean} True when the manifest contains a native skill/agent entrypoint
@@ -86,20 +86,20 @@ class ManifestGenerator {
 
   /**
    * Generate all manifests for the installation
-   * @param {string} bmadDir - _bmad
+   * @param {string} wtkDir - _wtk
    * @param {Array} selectedModules - Selected modules for installation
    * @param {Array} installedFiles - All installed files (optional, for hash tracking)
    */
-  async generateManifests(bmadDir, selectedModules, installedFiles = [], options = {}) {
+  async generateManifests(wtkDir, selectedModules, installedFiles = [], options = {}) {
     // Create _config directory if it doesn't exist
-    const cfgDir = path.join(bmadDir, '_config');
+    const cfgDir = path.join(wtkDir, '_config');
     await fs.ensureDir(cfgDir);
 
     // Store modules list (all modules including preserved ones)
     const preservedModules = options.preservedModules || [];
 
     // Scan the bmad directory to find all actually installed modules
-    const installedModules = await this.scanInstalledModules(bmadDir);
+    const installedModules = await this.scanInstalledModules(wtkDir);
 
     // Since custom modules are now installed the same way as regular modules,
     // we don't need to exclude them from manifest generation
@@ -112,8 +112,8 @@ class ManifestGenerator {
     // preservedModules controls which modules stay as-is in the CSV (don't get rescanned)
     // But all modules should be included in the final manifest
     this.preservedModules = allModules; // Include ALL modules (including custom)
-    this.bmadDir = bmadDir;
-    this.bmadFolderName = path.basename(bmadDir); // Get the actual folder name (e.g., '_bmad' or 'bmad')
+    this.wtkDir = wtkDir;
+    this.wtkFolderName = path.basename(wtkDir); // Get the actual folder name (e.g., '_wtk' or custom)
     this.allInstalledFiles = installedFiles;
 
     if (!Object.prototype.hasOwnProperty.call(options, 'ides')) {
@@ -171,17 +171,17 @@ class ManifestGenerator {
   /**
    * Recursively walk a module directory tree, collecting native SKILL.md entrypoints.
    * A native entrypoint directory is one that contains both a
-   * bmad-skill-manifest.yaml with type: skill or type: agent AND a SKILL.md file
+   * wtk-skill-manifest.yaml with type: skill or type: agent AND a SKILL.md file
    * with name/description frontmatter.
    * Populates this.skills[] and this.skillClaimedDirs (Set of absolute paths).
    */
   async collectSkills() {
     this.skills = [];
     this.skillClaimedDirs = new Set();
-    const debug = process.env.BMAD_DEBUG_MANIFEST === 'true';
+    const debug = process.env.WTK_DEBUG_MANIFEST === 'true';
 
     for (const moduleName of this.updatedModules) {
-      const modulePath = path.join(this.bmadDir, moduleName);
+      const modulePath = path.join(this.wtkDir, moduleName);
       if (!(await fs.pathExists(modulePath))) continue;
 
       // Recursive walk skipping . and _ prefixed dirs
@@ -211,15 +211,15 @@ class ManifestGenerator {
             // Build path relative from module root (points to SKILL.md — the permanent entrypoint)
             const relativePath = path.relative(modulePath, dir).split(path.sep).join('/');
             const installPath = relativePath
-              ? `${this.bmadFolderName}/${moduleName}/${relativePath}/${skillFile}`
-              : `${this.bmadFolderName}/${moduleName}/${skillFile}`;
+              ? `${this.wtkFolderName}/${moduleName}/${relativePath}/${skillFile}`
+              : `${this.wtkFolderName}/${moduleName}/${skillFile}`;
 
             // Native SKILL.md entrypoints derive canonicalId from directory name.
             // Agent entrypoints may keep canonicalId metadata for compatibility, so
             // only warn for non-agent SKILL.md directories.
             if (manifest && manifest.__single && manifest.__single.canonicalId && artifactType !== 'agent') {
               console.warn(
-                `Warning: Native entrypoint manifest at ${dir}/bmad-skill-manifest.yaml contains canonicalId — this field is ignored for SKILL.md directories (directory name is the canonical ID)`,
+                `Warning: Native entrypoint manifest at ${dir}/wtk-skill-manifest.yaml contains canonicalId — this field is ignored for SKILL.md directories (directory name is the canonical ID)`,
               );
             }
             const canonicalId = dirName;
@@ -230,7 +230,7 @@ class ManifestGenerator {
               module: moduleName,
               path: installPath,
               canonicalId,
-              install_to_bmad: this.getInstallToBmad(manifest, skillFile),
+              install_to_wtk: this.getInstallToWtk(manifest, skillFile),
             });
 
             // Add to files list
@@ -343,7 +343,7 @@ class ManifestGenerator {
 
     // Use updatedModules which already includes deduplicated 'core' + selectedModules
     for (const moduleName of this.updatedModules) {
-      const modulePath = path.join(this.bmadDir, moduleName);
+      const modulePath = path.join(this.wtkDir, moduleName);
 
       if (await fs.pathExists(modulePath)) {
         const moduleWorkflows = await this.getWorkflowsFromPath(modulePath, moduleName);
@@ -362,7 +362,7 @@ class ManifestGenerator {
   async getWorkflowsFromPath(basePath, moduleName, subDir = 'workflows') {
     const workflows = [];
     const workflowsPath = path.join(basePath, subDir);
-    const debug = process.env.BMAD_DEBUG_MANIFEST === 'true';
+    const debug = process.env.WTK_DEBUG_MANIFEST === 'true';
 
     if (debug) {
       console.log(`[DEBUG] Scanning workflows in: ${workflowsPath}`);
@@ -437,8 +437,8 @@ class ManifestGenerator {
               // Build relative path for installation
               const installPath =
                 moduleName === 'core'
-                  ? `${this.bmadFolderName}/core/${subDir}/${relativePath}/${entry.name}`
-                  : `${this.bmadFolderName}/${moduleName}/${subDir}/${relativePath}/${entry.name}`;
+                  ? `${this.wtkFolderName}/core/${subDir}/${relativePath}/${entry.name}`
+                  : `${this.wtkFolderName}/${moduleName}/${subDir}/${relativePath}/${entry.name}`;
 
               // Workflows with standalone: false are filtered out above
               workflows.push({
@@ -490,7 +490,7 @@ class ManifestGenerator {
 
     // Use updatedModules which already includes deduplicated 'core' + selectedModules
     for (const moduleName of this.updatedModules) {
-      const agentsPath = path.join(this.bmadDir, moduleName, 'agents');
+      const agentsPath = path.join(this.wtkDir, moduleName, 'agents');
 
       if (await fs.pathExists(agentsPath)) {
         const moduleAgents = await this.getAgentsFromDir(agentsPath, moduleName);
@@ -499,7 +499,7 @@ class ManifestGenerator {
     }
 
     // Get standalone agents from bmad/agents/ directory
-    const standaloneAgentsDir = path.join(this.bmadDir, 'agents');
+    const standaloneAgentsDir = path.join(this.wtkDir, 'agents');
     if (await fs.pathExists(standaloneAgentsDir)) {
       const agentDirs = await fs.readdir(standaloneAgentsDir, { withFileTypes: true });
 
@@ -529,7 +529,7 @@ class ManifestGenerator {
       const fullPath = path.join(dirPath, entry.name);
 
       if (entry.isDirectory()) {
-        // Check for new-format agent: bmad-skill-manifest.yaml with type: agent
+        // Check for new-format agent: wtk-skill-manifest.yaml with type: agent
         // Note: type:agent dirs may also be claimed by collectSkills for IDE installation,
         // but we still need to process them here for agent-manifest.csv
         const dirManifest = await this.loadSkillManifest(fullPath);
@@ -538,8 +538,8 @@ class ManifestGenerator {
           const dirRelativePath = relativePath ? `${relativePath}/${entry.name}` : entry.name;
           const installPath =
             moduleName === 'core'
-              ? `${this.bmadFolderName}/core/agents/${dirRelativePath}`
-              : `${this.bmadFolderName}/${moduleName}/agents/${dirRelativePath}`;
+              ? `${this.wtkFolderName}/core/agents/${dirRelativePath}`
+              : `${this.wtkFolderName}/${moduleName}/agents/${dirRelativePath}`;
 
           agents.push({
             name: m.name || entry.name,
@@ -601,8 +601,8 @@ class ManifestGenerator {
         const fileRelativePath = relativePath ? `${relativePath}/${entry.name}` : entry.name;
         const installPath =
           moduleName === 'core'
-            ? `${this.bmadFolderName}/core/agents/${fileRelativePath}`
-            : `${this.bmadFolderName}/${moduleName}/agents/${fileRelativePath}`;
+            ? `${this.wtkFolderName}/core/agents/${fileRelativePath}`
+            : `${this.wtkFolderName}/${moduleName}/agents/${fileRelativePath}`;
 
         const agentName = entry.name.replace('.md', '');
 
@@ -643,7 +643,7 @@ class ManifestGenerator {
 
     // Use updatedModules which already includes deduplicated 'core' + selectedModules
     for (const moduleName of this.updatedModules) {
-      const tasksPath = path.join(this.bmadDir, moduleName, 'tasks');
+      const tasksPath = path.join(this.wtkDir, moduleName, 'tasks');
 
       if (await fs.pathExists(tasksPath)) {
         const moduleTasks = await this.getTasksFromDir(tasksPath, moduleName);
@@ -712,7 +712,7 @@ class ManifestGenerator {
 
         // Build relative path for installation
         const installPath =
-          moduleName === 'core' ? `${this.bmadFolderName}/core/tasks/${file}` : `${this.bmadFolderName}/${moduleName}/tasks/${file}`;
+          moduleName === 'core' ? `${this.wtkFolderName}/core/tasks/${file}` : `${this.wtkFolderName}/${moduleName}/tasks/${file}`;
 
         tasks.push({
           name: name,
@@ -746,7 +746,7 @@ class ManifestGenerator {
 
     // Use updatedModules which already includes deduplicated 'core' + selectedModules
     for (const moduleName of this.updatedModules) {
-      const toolsPath = path.join(this.bmadDir, moduleName, 'tools');
+      const toolsPath = path.join(this.wtkDir, moduleName, 'tools');
 
       if (await fs.pathExists(toolsPath)) {
         const moduleTools = await this.getToolsFromDir(toolsPath, moduleName);
@@ -815,7 +815,7 @@ class ManifestGenerator {
 
         // Build relative path for installation
         const installPath =
-          moduleName === 'core' ? `${this.bmadFolderName}/core/tools/${file}` : `${this.bmadFolderName}/${moduleName}/tools/${file}`;
+          moduleName === 'core' ? `${this.wtkFolderName}/core/tools/${file}` : `${this.wtkFolderName}/${moduleName}/tools/${file}`;
 
         tools.push({
           name: name,
@@ -884,7 +884,7 @@ class ManifestGenerator {
 
     for (const moduleName of this.modules) {
       // Get fresh version info from source
-      const versionInfo = await manifestObj.getModuleVersionInfo(moduleName, this.bmadDir);
+      const versionInfo = await manifestObj.getModuleVersionInfo(moduleName, this.wtkDir);
 
       // Get existing install date if available
       const existing = existingModulesMap.get(moduleName);
@@ -1058,7 +1058,7 @@ class ManifestGenerator {
     const csvPath = path.join(cfgDir, 'skill-manifest.csv');
     const escapeCsv = (value) => `"${String(value ?? '').replaceAll('"', '""')}"`;
 
-    let csvContent = 'canonicalId,name,description,module,path,install_to_bmad\n';
+    let csvContent = 'canonicalId,name,description,module,path,install_to_wtk\n';
 
     for (const skill of this.skills) {
       const row = [
@@ -1067,7 +1067,7 @@ class ManifestGenerator {
         escapeCsv(skill.description),
         escapeCsv(skill.module),
         escapeCsv(skill.path),
-        escapeCsv(skill.install_to_bmad),
+        escapeCsv(skill.install_to_wtk),
       ].join(',');
       csvContent += row + '\n';
     }
@@ -1309,8 +1309,8 @@ class ManifestGenerator {
     if (this.allInstalledFiles && this.allInstalledFiles.length > 0) {
       // Process all installed files
       for (const filePath of this.allInstalledFiles) {
-        // Store paths relative to bmadDir (no folder prefix)
-        const relativePath = filePath.replace(this.bmadDir, '').replaceAll('\\', '/').replace(/^\//, '');
+        // Store paths relative to wtkDir (no folder prefix)
+        const relativePath = filePath.replace(this.wtkDir, '').replaceAll('\\', '/').replace(/^\//, '');
         const ext = path.extname(filePath).toLowerCase();
         const fileName = path.basename(filePath, ext);
 
@@ -1333,8 +1333,8 @@ class ManifestGenerator {
       // Fallback: use the collected workflows/agents/tasks
       for (const file of this.files) {
         // Strip the folder prefix if present (for consistency)
-        const relPath = file.path.replace(this.bmadFolderName + '/', '');
-        const filePath = path.join(this.bmadDir, relPath);
+        const relPath = file.path.replace(this.wtkFolderName + '/', '');
+        const filePath = path.join(this.wtkDir, relPath);
         const hash = await this.calculateFileHash(filePath);
         allFiles.push({
           ...file,
@@ -1362,14 +1362,14 @@ class ManifestGenerator {
 
   /**
    * Scan the bmad directory to find all installed modules
-   * @param {string} bmadDir - Path to bmad directory
+   * @param {string} wtkDir - Path to bmad directory
    * @returns {Array} List of module names
    */
-  async scanInstalledModules(bmadDir) {
+  async scanInstalledModules(wtkDir) {
     const modules = [];
 
     try {
-      const entries = await fs.readdir(bmadDir, { withFileTypes: true });
+      const entries = await fs.readdir(wtkDir, { withFileTypes: true });
 
       for (const entry of entries) {
         // Skip if not a directory or is a special directory
@@ -1378,14 +1378,14 @@ class ManifestGenerator {
         }
 
         // Check if this looks like a module (has agents, workflows, or tasks directory)
-        const modulePath = path.join(bmadDir, entry.name);
+        const modulePath = path.join(wtkDir, entry.name);
         const hasAgents = await fs.pathExists(path.join(modulePath, 'agents'));
         const hasWorkflows = await fs.pathExists(path.join(modulePath, 'workflows'));
         const hasTasks = await fs.pathExists(path.join(modulePath, 'tasks'));
         const hasTools = await fs.pathExists(path.join(modulePath, 'tools'));
 
         // Check for native-entrypoint-only modules: recursive scan for
-        // bmad-skill-manifest.yaml with type: skill or type: agent
+        // wtk-skill-manifest.yaml with type: skill or type: agent
         let hasSkills = false;
         if (!hasAgents && !hasWorkflows && !hasTasks && !hasTools) {
           hasSkills = await this._hasSkillManifestRecursive(modulePath);
@@ -1404,7 +1404,7 @@ class ManifestGenerator {
   }
 
   /**
-   * Recursively check if a directory tree contains a bmad-skill-manifest.yaml that
+   * Recursively check if a directory tree contains a wtk-skill-manifest.yaml that
    * declares a native SKILL.md entrypoint (type: skill or type: agent).
    * Skips directories starting with . or _.
    * @param {string} dir - Directory to search

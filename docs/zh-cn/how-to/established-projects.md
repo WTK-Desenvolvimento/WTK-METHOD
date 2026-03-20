@@ -1,27 +1,27 @@
 ---
 title: "既有项目"
-description: 如何在现有代码库中使用 BMad Method
+description: 如何在现有代码库中使用 Wtk Method
 sidebar:
   order: 6
 ---
 
-在现有项目和遗留代码库上工作时，有效使用 BMad Method。
+在现有项目和遗留代码库上工作时，有效使用 Wtk Method。
 
-本指南涵盖了使用 BMad Method 接入现有项目的核心工作流程。
+本指南涵盖了使用 Wtk Method 接入现有项目的核心工作流程。
 
 :::note[前置条件]
-- 已安装 BMad Method（`npx bmad-method install`）
+- 已安装 Wtk Method（`npx wtk-method install`）
 - 一个你想要处理的现有代码库
 - 访问 AI 驱动的 IDE（Claude Code 或 Cursor）
 :::
 
 ## 步骤 1：清理已完成的规划产物
 
-如果你通过 BMad 流程完成了所有 PRD 史诗和用户故事，请清理这些文件。归档它们、删除它们，或者在需要时依赖版本历史。不要将这些文件保留在：
+如果你通过 Wtk 流程完成了所有 PRD 史诗和用户故事，请清理这些文件。归档它们、删除它们，或者在需要时依赖版本历史。不要将这些文件保留在：
 
 - `docs/`
-- `_bmad-output/planning-artifacts/`
-- `_bmad-output/implementation-artifacts/`
+- `_wtk-output/planning-artifacts/`
+- `_wtk-output/implementation-artifacts/`
 
 ## 步骤 2：创建项目上下文
 
@@ -32,7 +32,7 @@ sidebar:
 运行生成项目上下文工作流程：
 
 ```bash
-/bmad-bmm-generate-project-context
+/wtk-bmm-generate-project-context
 ```
 
 这将扫描你的代码库以识别：
@@ -42,7 +42,7 @@ sidebar:
 - 测试方法
 - 框架特定模式
 
-你可以查看和完善生成的文件，或者如果你更喜欢，可以在 `_bmad-output/project-context.md` 手动创建它。
+你可以查看和完善生成的文件，或者如果你更喜欢，可以在 `_wtk-output/project-context.md` 手动创建它。
 
 [了解更多关于项目上下文](../explanation/project-context.md)
 
@@ -59,21 +59,21 @@ sidebar:
 
 ## 步骤 3：获取帮助
 
-### BMad-Help：你的起点
+### Wtk-Help：你的起点
 
-**随时运行 `bmad-help`，当你不确定下一步该做什么时。** 这个智能指南：
+**随时运行 `wtk-help`，当你不确定下一步该做什么时。** 这个智能指南：
 
 - 检查你的项目以查看已经完成了什么
 - 根据你安装的模块显示选项
 - 理解自然语言查询
 
 ```
-bmad-help 我有一个现有的 Rails 应用，我应该从哪里开始？
-bmad-help quick-flow 和完整方法有什么区别？
-bmad-help 显示我有哪些可用的工作流程
+wtk-help 我有一个现有的 Rails 应用，我应该从哪里开始？
+wtk-help quick-flow 和完整方法有什么区别？
+wtk-help 显示我有哪些可用的工作流程
 ```
 
-BMad-Help 还会在**每个工作流程结束时自动运行**，提供关于下一步该做什么的清晰指导。
+Wtk-Help 还会在**每个工作流程结束时自动运行**，提供关于下一步该做什么的清晰指导。
 
 ### 选择你的方法
 
@@ -81,8 +81,8 @@ BMad-Help 还会在**每个工作流程结束时自动运行**，提供关于下
 
 | 范围                          | 推荐方法                                                                                                          |
 | ------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
-| **小型更新或添加** | 运行 `bmad-quick-dev` 在单个工作流中澄清意图、规划、实现和审查。完整的四阶段 BMad Method 可能有些过度。 |
-| **重大变更或添加** | 从 BMad Method 开始，根据需要应用或多或少的严谨性。                                                    |
+| **小型更新或添加** | 运行 `wtk-quick-dev` 在单个工作流中澄清意图、规划、实现和审查。完整的四阶段 Wtk Method 可能有些过度。 |
+| **重大变更或添加** | 从 Wtk Method 开始，根据需要应用或多或少的严谨性。                                                    |
 
 ### 在创建 PRD 期间
 
@@ -119,7 +119,7 @@ UX 工作是可选的。决定不取决于你的项目是否有 UX，而取决�
 ---
 ## 术语说明
 
-- **BMad Method**：BMad 方法。一种结构化的软件开发方法论，用于指导从分析到实施的完整流程。
+- **Wtk Method**：Wtk 方法。一种结构化的软件开发方法论，用于指导从分析到实施的完整流程。
 - **PRD**：产品需求文档（Product Requirements Document）。描述产品功能、需求和目标的文档。
 - **epic**：史诗。大型功能或用户故事的集合，通常需要较长时间完成。
 - **story**：用户故事。描述用户需求的简短陈述，通常遵循"作为...我想要...以便于..."的格式。
@@ -127,7 +127,7 @@ UX 工作是可选的。决定不取决于你的项目是否有 UX，而取决�
 - **IDE**：集成开发环境（Integrated Development Environment）。提供代码编辑、调试、构建等功能的软件工具。
 - **UX**：用户体验（User Experience）。用户在使用产品或服务过程中的整体感受和交互体验。
 - **tech-spec**：技术规范（Technical Specification）。描述技术实现细节、架构设计和开发标准的文档。
-- **quick-flow**：快速流程。BMad Method 中的一种简化工作流程，适用于小型变更或快速迭代。
+- **quick-flow**：快速流程。Wtk Method 中的一种简化工作流程，适用于小型变更或快速迭代。
 - **legacy codebase**：遗留代码库。指历史遗留的、可能缺乏文档或使用过时技术的代码集合。
 - **project context**：项目上下文。描述项目技术栈、约定、模式等背景信息的文档。
 - **artifact**：产物。在开发过程中生成的文档、代码或其他输出物。

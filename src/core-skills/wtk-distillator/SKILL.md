@@ -1,5 +1,5 @@
 ---
-name: bmad-distillator
+name: wtk-distillator
 description: Lossless LLM-optimized compression of source documents. Use when the user requests to 'distill documents' or 'create a distillate'.
 argument-hint: "[to create provide input paths] [--validate distillate-path to confirm distillate is lossless and optimized]"
 ---
@@ -75,7 +75,7 @@ After the compressor (or merge compressor) returns:
 
    ```yaml
    ---
-   type: bmad-distillate
+   type: wtk-distillate
    sources:
      - "{relative path to source file 1}"
      - "{relative path to source file 2}"

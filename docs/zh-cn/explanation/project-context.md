@@ -95,12 +95,12 @@ AI 智能体不断做出实施决策——遵循哪些模式、如何组织代�
 
 ### 手动创建
 
-在 `_bmad-output/project-context.md` 创建文件并添加您的规则：
+在 `_wtk-output/project-context.md` 创建文件并添加您的规则：
 
 ```bash
 # In your project root
-mkdir -p _bmad-output
-touch _bmad-output/project-context.md
+mkdir -p _wtk-output
+touch _wtk-output/project-context.md
 ```
 
 使用您的技术栈和实施规则编辑它。架构师和实施工作流将自动查找并加载它。
@@ -110,7 +110,7 @@ touch _bmad-output/project-context.md
 在完成架构后运行 `generate-project-context` 工作流：
 
 ```bash
-/bmad-bmm-generate-project-context
+/wtk-bmm-generate-project-context
 ```
 
 这将扫描您的架构文档和项目文件，生成一个捕获所做决策的上下文文件。
@@ -120,7 +120,7 @@ touch _bmad-output/project-context.md
 对于现有项目，运行 `generate-project-context` 以发现现有模式：
 
 ```bash
-/bmad-bmm-generate-project-context
+/wtk-bmm-generate-project-context
 ```
 
 该工作流分析您的代码库以识别约定，然后生成一个您可以审查和优化的上下文文件。
@@ -153,7 +153,7 @@ touch _bmad-output/project-context.md
 您可以随时手动编辑它，或者在重大更改后重新运行 `generate-project-context` 来更新它。
 
 :::note[文件位置]
-默认位置是 `_bmad-output/project-context.md`。工作流在那里搜索它，并且还会检查项目中任何位置的 `**/project-context.md`。
+默认位置是 `_wtk-output/project-context.md`。工作流在那里搜索它，并且还会检查项目中任何位置的 `**/project-context.md`。
 :::
 
 ---

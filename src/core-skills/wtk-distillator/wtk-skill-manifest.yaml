@@ -1,7 +1,7 @@
 type: skill
 module: core
 capabilities:
-  - name: bmad-distillator
+  - name: wtk-distillator
     menu-code: DSTL
     description: "Produces lossless LLM-optimized distillate from source documents. Use after producing large human presentable documents that will be consumed later by LLMs"
     supports-headless: true

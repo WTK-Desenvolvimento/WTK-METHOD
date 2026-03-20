@@ -49,7 +49,7 @@ function assert(condition, testName, errorMessage = '') {
 }
 
 async function createTestBmadFixture() {
-  const fixtureDir = await fs.mkdtemp(path.join(os.tmpdir(), 'bmad-fixture-'));
+  const fixtureDir = await fs.mkdtemp(path.join(os.tmpdir(), 'wtk-fixture-'));
 
   // Minimal workflow manifest (generators check for this)
   await fs.ensureDir(path.join(fixtureDir, '_config'));
@@ -70,9 +70,9 @@ async function createTestBmadFixture() {
   ].join('\n');
 
   await fs.ensureDir(path.join(fixtureDir, 'core', 'agents'));
-  await fs.writeFile(path.join(fixtureDir, 'core', 'agents', 'bmad-master.md'), minimalAgent);
-  // Skill manifest so the installer uses 'bmad-master' as the canonical skill name
-  await fs.writeFile(path.join(fixtureDir, 'core', 'agents', 'bmad-skill-manifest.yaml'), 'bmad-master.md:\n  canonicalId: bmad-master\n');
+  await fs.writeFile(path.join(fixtureDir, 'core', 'agents', 'wtk-master.md'), minimalAgent);
+  // Skill manifest so the installer uses 'wtk-master' as the canonical skill name
+  await fs.writeFile(path.join(fixtureDir, 'core', 'agents', 'wtk-skill-manifest.yaml'), 'wtk-master.md:\n  canonicalId: wtk-master\n');
 
   // Minimal compiled agent for bmm module (tests use selectedModules: ['bmm'])
   await fs.ensureDir(path.join(fixtureDir, 'bmm', 'agents'));
@@ -82,8 +82,8 @@ async function createTestBmadFixture() {
 }
 
 async function createSkillCollisionFixture() {
-  const fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'bmad-skill-collision-'));
-  const fixtureDir = path.join(fixtureRoot, '_bmad');
+  const fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'wtk-skill-collision-'));
+  const fixtureDir = path.join(fixtureRoot, '_wtk');
   const configDir = path.join(fixtureDir, '_config');
   await fs.ensureDir(configDir);
 
@@ -91,7 +91,7 @@ async function createSkillCollisionFixture() {
     path.join(configDir, 'agent-manifest.csv'),
     [
       'name,displayName,title,icon,capabilities,role,identity,communicationStyle,principles,module,path,canonicalId',
-      '"bmad-master","BMAD Master","","","","","","","","core","_bmad/core/agents/bmad-master.md","bmad-master"',
+      '"wtk-master","WTK Master","","","","","","","","core","_wtk/core/agents/wtk-master.md","wtk-master"',
       '',
     ].join('\n'),
   );
@@ -100,7 +100,7 @@ async function createSkillCollisionFixture() {
     path.join(configDir, 'workflow-manifest.csv'),
     [
       'name,description,module,path,canonicalId',
-      '"help","Workflow help","core","_bmad/core/workflows/help/workflow.md","bmad-help"',
+      '"help","Workflow help","core","_wtk/core/workflows/help/workflow.md","wtk-help"',
       '',
     ].join('\n'),
   );
@@ -110,29 +110,27 @@ async function createSkillCollisionFixture() {
   await fs.writeFile(
     path.join(configDir, 'skill-manifest.csv'),
     [
-      'canonicalId,name,description,module,path,install_to_bmad',
-      '"bmad-help","bmad-help","Native help skill","core","_bmad/core/tasks/bmad-help/SKILL.md","true"',
+      'canonicalId,name,description,module,path,install_to_wtk',
+      '"wtk-help","wtk-help","Native help skill","core","_wtk/core/tasks/wtk-help/SKILL.md","true"',
       '',
     ].join('\n'),
   );
 
-  const skillDir = path.join(fixtureDir, 'core', 'tasks', 'bmad-help');
+  const skillDir = path.join(fixtureDir, 'core', 'tasks', 'wtk-help');
   await fs.ensureDir(skillDir);
   await fs.writeFile(
     path.join(skillDir, 'SKILL.md'),
-    ['---', 'name: bmad-help', 'description: Native help skill', '---', '', 'Use this skill directly.'].join('\n'),
+    ['---', 'name: wtk-help', 'description: Native help skill', '---', '', 'Use this skill directly.'].join('\n'),
   );
 
   const agentDir = path.join(fixtureDir, 'core', 'agents');
   await fs.ensureDir(agentDir);
   await fs.writeFile(
-    path.join(agentDir, 'bmad-master.md'),
-    ['---', 'name: BMAD Master', 'description: Master agent', '---', '', '<agent name="BMAD Master" title="Master">', '</agent>'].join(
-      '\n',
-    ),
+    path.join(agentDir, 'wtk-master.md'),
+    ['---', 'name: WTK Master', 'description: Master agent', '---', '', '<agent name="WTK Master" title="Master">', '</agent>'].join('\n'),
   );
 
-  return { root: fixtureRoot, bmadDir: fixtureDir };
+  return { root: fixtureRoot, wtkDir: fixtureDir };
 }
 
 /**
@@ -198,8 +196,8 @@ async function runTests() {
     // Test path resolution logic (if exposed)
     // This would test {project-root}, {installed_path}, {config_source} resolution
 
-    const testPath = '{project-root}/bmad/bmm/config.yaml';
-    const expectedPattern = /\/bmad\/bmm\/config\.yaml$/;
+    const testPath = '{project-root}/_wtk/bmm/config.yaml';
+    const expectedPattern = /\/_wtk\/bmm\/config\.yaml$/;
 
     assert(
       true, // Placeholder - would test actual resolution
@@ -231,11 +229,11 @@ async function runTests() {
       'Windsurf installer cleans legacy workflow output',
     );
 
-    const tempProjectDir = await fs.mkdtemp(path.join(os.tmpdir(), 'bmad-windsurf-test-'));
+    const tempProjectDir = await fs.mkdtemp(path.join(os.tmpdir(), 'wtk-windsurf-test-'));
     const installedBmadDir = await createTestBmadFixture();
-    const legacyDir = path.join(tempProjectDir, '.windsurf', 'workflows', 'bmad-legacy-dir');
+    const legacyDir = path.join(tempProjectDir, '.windsurf', 'workflows', 'wtk-legacy-dir');
     await fs.ensureDir(legacyDir);
-    await fs.writeFile(path.join(tempProjectDir, '.windsurf', 'workflows', 'bmad-legacy.md'), 'legacy\n');
+    await fs.writeFile(path.join(tempProjectDir, '.windsurf', 'workflows', 'wtk-legacy.md'), 'legacy\n');
     await fs.writeFile(path.join(legacyDir, 'SKILL.md'), 'legacy\n');
 
     const ideManager = new IdeManager();
@@ -247,7 +245,7 @@ async function runTests() {
 
     assert(result.success === true, 'Windsurf setup succeeds against temp project');
 
-    const skillFile = path.join(tempProjectDir, '.windsurf', 'skills', 'bmad-master', 'SKILL.md');
+    const skillFile = path.join(tempProjectDir, '.windsurf', 'skills', 'wtk-master', 'SKILL.md');
     assert(await fs.pathExists(skillFile), 'Windsurf install writes SKILL.md directory output');
 
     assert(!(await fs.pathExists(path.join(tempProjectDir, '.windsurf', 'workflows'))), 'Windsurf setup removes legacy workflows dir');
@@ -279,11 +277,11 @@ async function runTests() {
       'Kiro installer cleans legacy steering output',
     );
 
-    const tempProjectDir = await fs.mkdtemp(path.join(os.tmpdir(), 'bmad-kiro-test-'));
+    const tempProjectDir = await fs.mkdtemp(path.join(os.tmpdir(), 'wtk-kiro-test-'));
     const installedBmadDir = await createTestBmadFixture();
-    const legacyDir = path.join(tempProjectDir, '.kiro', 'steering', 'bmad-legacy-dir');
+    const legacyDir = path.join(tempProjectDir, '.kiro', 'steering', 'wtk-legacy-dir');
     await fs.ensureDir(legacyDir);
-    await fs.writeFile(path.join(tempProjectDir, '.kiro', 'steering', 'bmad-legacy.md'), 'legacy\n');
+    await fs.writeFile(path.join(tempProjectDir, '.kiro', 'steering', 'wtk-legacy.md'), 'legacy\n');
     await fs.writeFile(path.join(legacyDir, 'SKILL.md'), 'legacy\n');
 
     const ideManager = new IdeManager();
@@ -295,7 +293,7 @@ async function runTests() {
 
     assert(result.success === true, 'Kiro setup succeeds against temp project');
 
-    const skillFile = path.join(tempProjectDir, '.kiro', 'skills', 'bmad-master', 'SKILL.md');
+    const skillFile = path.join(tempProjectDir, '.kiro', 'skills', 'wtk-master', 'SKILL.md');
     assert(await fs.pathExists(skillFile), 'Kiro install writes SKILL.md directory output');
 
     assert(!(await fs.pathExists(path.join(tempProjectDir, '.kiro', 'steering'))), 'Kiro setup removes legacy steering dir');
@@ -327,11 +325,11 @@ async function runTests() {
       'Antigravity installer cleans legacy workflow output',
     );
 
-    const tempProjectDir = await fs.mkdtemp(path.join(os.tmpdir(), 'bmad-antigravity-test-'));
+    const tempProjectDir = await fs.mkdtemp(path.join(os.tmpdir(), 'wtk-antigravity-test-'));
     const installedBmadDir = await createTestBmadFixture();
-    const legacyDir = path.join(tempProjectDir, '.agent', 'workflows', 'bmad-legacy-dir');
+    const legacyDir = path.join(tempProjectDir, '.agent', 'workflows', 'wtk-legacy-dir');
     await fs.ensureDir(legacyDir);
-    await fs.writeFile(path.join(tempProjectDir, '.agent', 'workflows', 'bmad-legacy.md'), 'legacy\n');
+    await fs.writeFile(path.join(tempProjectDir, '.agent', 'workflows', 'wtk-legacy.md'), 'legacy\n');
     await fs.writeFile(path.join(legacyDir, 'SKILL.md'), 'legacy\n');
 
     const ideManager = new IdeManager();
@@ -343,7 +341,7 @@ async function runTests() {
 
     assert(result.success === true, 'Antigravity setup succeeds against temp project');
 
-    const skillFile = path.join(tempProjectDir, '.agent', 'skills', 'bmad-master', 'SKILL.md');
+    const skillFile = path.join(tempProjectDir, '.agent', 'skills', 'wtk-master', 'SKILL.md');
     assert(await fs.pathExists(skillFile), 'Antigravity install writes SKILL.md directory output');
 
     assert(!(await fs.pathExists(path.join(tempProjectDir, '.agent', 'workflows'))), 'Antigravity setup removes legacy workflows dir');
@@ -380,11 +378,11 @@ async function runTests() {
       'Auggie installer does not enable ancestor conflict checks without verified inheritance',
     );
 
-    const tempProjectDir = await fs.mkdtemp(path.join(os.tmpdir(), 'bmad-auggie-test-'));
+    const tempProjectDir = await fs.mkdtemp(path.join(os.tmpdir(), 'wtk-auggie-test-'));
     const installedBmadDir = await createTestBmadFixture();
-    const legacyDir = path.join(tempProjectDir, '.augment', 'commands', 'bmad-legacy-dir');
+    const legacyDir = path.join(tempProjectDir, '.augment', 'commands', 'wtk-legacy-dir');
     await fs.ensureDir(legacyDir);
-    await fs.writeFile(path.join(tempProjectDir, '.augment', 'commands', 'bmad-legacy.md'), 'legacy\n');
+    await fs.writeFile(path.join(tempProjectDir, '.augment', 'commands', 'wtk-legacy.md'), 'legacy\n');
     await fs.writeFile(path.join(legacyDir, 'SKILL.md'), 'legacy\n');
 
     const ideManager = new IdeManager();
@@ -396,7 +394,7 @@ async function runTests() {
 
     assert(result.success === true, 'Auggie setup succeeds against temp project');
 
-    const skillFile = path.join(tempProjectDir, '.augment', 'skills', 'bmad-master', 'SKILL.md');
+    const skillFile = path.join(tempProjectDir, '.augment', 'skills', 'wtk-master', 'SKILL.md');
     assert(await fs.pathExists(skillFile), 'Auggie install writes SKILL.md directory output');
 
     assert(!(await fs.pathExists(path.join(tempProjectDir, '.augment', 'commands'))), 'Auggie setup removes legacy commands dir');
@@ -433,13 +431,13 @@ async function runTests() {
       'OpenCode installer cleans split legacy agent and command output',
     );
 
-    const tempProjectDir = await fs.mkdtemp(path.join(os.tmpdir(), 'bmad-opencode-test-'));
+    const tempProjectDir = await fs.mkdtemp(path.join(os.tmpdir(), 'wtk-opencode-test-'));
     const installedBmadDir = await createTestBmadFixture();
     const legacyDirs = [
-      path.join(tempProjectDir, '.opencode', 'agents', 'bmad-legacy-agent'),
-      path.join(tempProjectDir, '.opencode', 'commands', 'bmad-legacy-command'),
-      path.join(tempProjectDir, '.opencode', 'agent', 'bmad-legacy-agent-singular'),
-      path.join(tempProjectDir, '.opencode', 'command', 'bmad-legacy-command-singular'),
+      path.join(tempProjectDir, '.opencode', 'agents', 'wtk-legacy-agent'),
+      path.join(tempProjectDir, '.opencode', 'commands', 'wtk-legacy-command'),
+      path.join(tempProjectDir, '.opencode', 'agent', 'wtk-legacy-agent-singular'),
+      path.join(tempProjectDir, '.opencode', 'command', 'wtk-legacy-command-singular'),
     ];
 
     for (const legacyDir of legacyDirs) {
@@ -457,7 +455,7 @@ async function runTests() {
 
     assert(result.success === true, 'OpenCode setup succeeds against temp project');
 
-    const skillFile = path.join(tempProjectDir, '.opencode', 'skills', 'bmad-master', 'SKILL.md');
+    const skillFile = path.join(tempProjectDir, '.opencode', 'skills', 'wtk-master', 'SKILL.md');
     assert(await fs.pathExists(skillFile), 'OpenCode install writes SKILL.md directory output');
 
     for (const legacyDir of ['agents', 'commands', 'agent', 'command']) {
@@ -496,11 +494,11 @@ async function runTests() {
       'Claude Code installer cleans legacy command output',
     );
 
-    const tempProjectDir9 = await fs.mkdtemp(path.join(os.tmpdir(), 'bmad-claude-code-test-'));
+    const tempProjectDir9 = await fs.mkdtemp(path.join(os.tmpdir(), 'wtk-claude-code-test-'));
     const installedBmadDir9 = await createTestBmadFixture();
     const legacyDir9 = path.join(tempProjectDir9, '.claude', 'commands');
     await fs.ensureDir(legacyDir9);
-    await fs.writeFile(path.join(legacyDir9, 'bmad-legacy.md'), 'legacy\n');
+    await fs.writeFile(path.join(legacyDir9, 'wtk-legacy.md'), 'legacy\n');
 
     const ideManager9 = new IdeManager();
     await ideManager9.ensureInitialized();
@@ -511,13 +509,13 @@ async function runTests() {
 
     assert(result9.success === true, 'Claude Code setup succeeds against temp project');
 
-    const skillFile9 = path.join(tempProjectDir9, '.claude', 'skills', 'bmad-master', 'SKILL.md');
+    const skillFile9 = path.join(tempProjectDir9, '.claude', 'skills', 'wtk-master', 'SKILL.md');
     assert(await fs.pathExists(skillFile9), 'Claude Code install writes SKILL.md directory output');
 
     // Verify name frontmatter matches directory name
     const skillContent9 = await fs.readFile(skillFile9, 'utf8');
     const nameMatch9 = skillContent9.match(/^name:\s*(.+)$/m);
-    assert(nameMatch9 && nameMatch9[1].trim() === 'bmad-master', 'Claude Code skill name frontmatter matches directory name exactly');
+    assert(nameMatch9 && nameMatch9[1].trim() === 'wtk-master', 'Claude Code skill name frontmatter matches directory name exactly');
 
     assert(!(await fs.pathExists(legacyDir9)), 'Claude Code setup removes legacy commands dir');
 
@@ -535,15 +533,15 @@ async function runTests() {
   console.log(`${colors.yellow}Test Suite 10: Claude Code Ancestor Conflict${colors.reset}\n`);
 
   try {
-    const tempRoot10 = await fs.mkdtemp(path.join(os.tmpdir(), 'bmad-claude-code-ancestor-test-'));
+    const tempRoot10 = await fs.mkdtemp(path.join(os.tmpdir(), 'wtk-claude-code-ancestor-test-'));
     const parentProjectDir10 = path.join(tempRoot10, 'parent');
     const childProjectDir10 = path.join(parentProjectDir10, 'child');
     const installedBmadDir10 = await createTestBmadFixture();
 
     await fs.ensureDir(path.join(parentProjectDir10, '.git'));
-    await fs.ensureDir(path.join(parentProjectDir10, '.claude', 'skills', 'bmad-existing'));
+    await fs.ensureDir(path.join(parentProjectDir10, '.claude', 'skills', 'wtk-existing'));
     await fs.ensureDir(childProjectDir10);
-    await fs.writeFile(path.join(parentProjectDir10, '.claude', 'skills', 'bmad-existing', 'SKILL.md'), 'legacy\n');
+    await fs.writeFile(path.join(parentProjectDir10, '.claude', 'skills', 'wtk-existing', 'SKILL.md'), 'legacy\n');
 
     const ideManager10 = new IdeManager();
     await ideManager10.ensureInitialized();
@@ -589,11 +587,11 @@ async function runTests() {
       'Codex installer cleans legacy prompt output',
     );
 
-    const tempProjectDir11 = await fs.mkdtemp(path.join(os.tmpdir(), 'bmad-codex-test-'));
+    const tempProjectDir11 = await fs.mkdtemp(path.join(os.tmpdir(), 'wtk-codex-test-'));
     const installedBmadDir11 = await createTestBmadFixture();
     const legacyDir11 = path.join(tempProjectDir11, '.codex', 'prompts');
     await fs.ensureDir(legacyDir11);
-    await fs.writeFile(path.join(legacyDir11, 'bmad-legacy.md'), 'legacy\n');
+    await fs.writeFile(path.join(legacyDir11, 'wtk-legacy.md'), 'legacy\n');
 
     const ideManager11 = new IdeManager();
     await ideManager11.ensureInitialized();
@@ -604,13 +602,13 @@ async function runTests() {
 
     assert(result11.success === true, 'Codex setup succeeds against temp project');
 
-    const skillFile11 = path.join(tempProjectDir11, '.agents', 'skills', 'bmad-master', 'SKILL.md');
+    const skillFile11 = path.join(tempProjectDir11, '.agents', 'skills', 'wtk-master', 'SKILL.md');
     assert(await fs.pathExists(skillFile11), 'Codex install writes SKILL.md directory output');
 
     // Verify name frontmatter matches directory name
     const skillContent11 = await fs.readFile(skillFile11, 'utf8');
     const nameMatch11 = skillContent11.match(/^name:\s*(.+)$/m);
-    assert(nameMatch11 && nameMatch11[1].trim() === 'bmad-master', 'Codex skill name frontmatter matches directory name exactly');
+    assert(nameMatch11 && nameMatch11[1].trim() === 'wtk-master', 'Codex skill name frontmatter matches directory name exactly');
 
     assert(!(await fs.pathExists(legacyDir11)), 'Codex setup removes legacy prompts dir');
 
@@ -628,15 +626,15 @@ async function runTests() {
   console.log(`${colors.yellow}Test Suite 12: Codex Ancestor Conflict${colors.reset}\n`);
 
   try {
-    const tempRoot12 = await fs.mkdtemp(path.join(os.tmpdir(), 'bmad-codex-ancestor-test-'));
+    const tempRoot12 = await fs.mkdtemp(path.join(os.tmpdir(), 'wtk-codex-ancestor-test-'));
     const parentProjectDir12 = path.join(tempRoot12, 'parent');
     const childProjectDir12 = path.join(parentProjectDir12, 'child');
     const installedBmadDir12 = await createTestBmadFixture();
 
     await fs.ensureDir(path.join(parentProjectDir12, '.git'));
-    await fs.ensureDir(path.join(parentProjectDir12, '.agents', 'skills', 'bmad-existing'));
+    await fs.ensureDir(path.join(parentProjectDir12, '.agents', 'skills', 'wtk-existing'));
     await fs.ensureDir(childProjectDir12);
-    await fs.writeFile(path.join(parentProjectDir12, '.agents', 'skills', 'bmad-existing', 'SKILL.md'), 'legacy\n');
+    await fs.writeFile(path.join(parentProjectDir12, '.agents', 'skills', 'wtk-existing', 'SKILL.md'), 'legacy\n');
 
     const ideManager12 = new IdeManager();
     await ideManager12.ensureInitialized();
@@ -679,11 +677,11 @@ async function runTests() {
 
     assert(!cursorInstaller?.ancestor_conflict_check, 'Cursor installer does not enable ancestor conflict checks');
 
-    const tempProjectDir13c = await fs.mkdtemp(path.join(os.tmpdir(), 'bmad-cursor-test-'));
+    const tempProjectDir13c = await fs.mkdtemp(path.join(os.tmpdir(), 'wtk-cursor-test-'));
     const installedBmadDir13c = await createTestBmadFixture();
     const legacyDir13c = path.join(tempProjectDir13c, '.cursor', 'commands');
     await fs.ensureDir(legacyDir13c);
-    await fs.writeFile(path.join(legacyDir13c, 'bmad-legacy.md'), 'legacy\n');
+    await fs.writeFile(path.join(legacyDir13c, 'wtk-legacy.md'), 'legacy\n');
 
     const ideManager13c = new IdeManager();
     await ideManager13c.ensureInitialized();
@@ -694,13 +692,13 @@ async function runTests() {
 
     assert(result13c.success === true, 'Cursor setup succeeds against temp project');
 
-    const skillFile13c = path.join(tempProjectDir13c, '.cursor', 'skills', 'bmad-master', 'SKILL.md');
+    const skillFile13c = path.join(tempProjectDir13c, '.cursor', 'skills', 'wtk-master', 'SKILL.md');
     assert(await fs.pathExists(skillFile13c), 'Cursor install writes SKILL.md directory output');
 
     // Verify name frontmatter matches directory name
     const skillContent13c = await fs.readFile(skillFile13c, 'utf8');
     const nameMatch13c = skillContent13c.match(/^name:\s*(.+)$/m);
-    assert(nameMatch13c && nameMatch13c[1].trim() === 'bmad-master', 'Cursor skill name frontmatter matches directory name exactly');
+    assert(nameMatch13c && nameMatch13c[1].trim() === 'wtk-master', 'Cursor skill name frontmatter matches directory name exactly');
 
     assert(!(await fs.pathExists(legacyDir13c)), 'Cursor setup removes legacy commands dir');
 
@@ -731,11 +729,11 @@ async function runTests() {
       'Roo installer cleans legacy command output',
     );
 
-    const tempProjectDir13 = await fs.mkdtemp(path.join(os.tmpdir(), 'bmad-roo-test-'));
+    const tempProjectDir13 = await fs.mkdtemp(path.join(os.tmpdir(), 'wtk-roo-test-'));
     const installedBmadDir13 = await createTestBmadFixture();
-    const legacyDir13 = path.join(tempProjectDir13, '.roo', 'commands', 'bmad-legacy-dir');
+    const legacyDir13 = path.join(tempProjectDir13, '.roo', 'commands', 'wtk-legacy-dir');
     await fs.ensureDir(legacyDir13);
-    await fs.writeFile(path.join(tempProjectDir13, '.roo', 'commands', 'bmad-legacy.md'), 'legacy\n');
+    await fs.writeFile(path.join(tempProjectDir13, '.roo', 'commands', 'wtk-legacy.md'), 'legacy\n');
     await fs.writeFile(path.join(legacyDir13, 'SKILL.md'), 'legacy\n');
 
     const ideManager13 = new IdeManager();
@@ -747,14 +745,14 @@ async function runTests() {
 
     assert(result13.success === true, 'Roo setup succeeds against temp project');
 
-    const skillFile13 = path.join(tempProjectDir13, '.roo', 'skills', 'bmad-master', 'SKILL.md');
+    const skillFile13 = path.join(tempProjectDir13, '.roo', 'skills', 'wtk-master', 'SKILL.md');
     assert(await fs.pathExists(skillFile13), 'Roo install writes SKILL.md directory output');
 
     // Verify name frontmatter matches directory name (Roo constraint: lowercase alphanumeric + hyphens)
     const skillContent13 = await fs.readFile(skillFile13, 'utf8');
     const nameMatch13 = skillContent13.match(/^name:\s*(.+)$/m);
     assert(
-      nameMatch13 && nameMatch13[1].trim() === 'bmad-master',
+      nameMatch13 && nameMatch13[1].trim() === 'wtk-master',
       'Roo skill name frontmatter matches directory name exactly (lowercase alphanumeric + hyphens)',
     );
 
@@ -783,15 +781,15 @@ async function runTests() {
   console.log(`${colors.yellow}Test Suite 15: OpenCode Ancestor Conflict${colors.reset}\n`);
 
   try {
-    const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'bmad-opencode-ancestor-test-'));
+    const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'wtk-opencode-ancestor-test-'));
     const parentProjectDir = path.join(tempRoot, 'parent');
     const childProjectDir = path.join(parentProjectDir, 'child');
     const installedBmadDir = await createTestBmadFixture();
 
     await fs.ensureDir(path.join(parentProjectDir, '.git'));
-    await fs.ensureDir(path.join(parentProjectDir, '.opencode', 'skills', 'bmad-existing'));
+    await fs.ensureDir(path.join(parentProjectDir, '.opencode', 'skills', 'wtk-existing'));
     await fs.ensureDir(childProjectDir);
-    await fs.writeFile(path.join(parentProjectDir, '.opencode', 'skills', 'bmad-existing', 'SKILL.md'), 'legacy\n');
+    await fs.writeFile(path.join(parentProjectDir, '.opencode', 'skills', 'wtk-existing', 'SKILL.md'), 'legacy\n');
 
     const ideManager = new IdeManager();
     await ideManager.ensureInitialized();
@@ -844,7 +842,7 @@ async function runTests() {
       'GitHub Copilot installer cleans legacy prompts output',
     );
 
-    const tempProjectDir17 = await fs.mkdtemp(path.join(os.tmpdir(), 'bmad-copilot-test-'));
+    const tempProjectDir17 = await fs.mkdtemp(path.join(os.tmpdir(), 'wtk-copilot-test-'));
     const installedBmadDir17 = await createTestBmadFixture();
 
     // Create legacy .github/agents/ and .github/prompts/ files
@@ -852,14 +850,14 @@ async function runTests() {
     const legacyPromptsDir17 = path.join(tempProjectDir17, '.github', 'prompts');
     await fs.ensureDir(legacyAgentsDir17);
     await fs.ensureDir(legacyPromptsDir17);
-    await fs.writeFile(path.join(legacyAgentsDir17, 'bmad-legacy.agent.md'), 'legacy agent\n');
-    await fs.writeFile(path.join(legacyPromptsDir17, 'bmad-legacy.prompt.md'), 'legacy prompt\n');
+    await fs.writeFile(path.join(legacyAgentsDir17, 'wtk-legacy.agent.md'), 'legacy agent\n');
+    await fs.writeFile(path.join(legacyPromptsDir17, 'wtk-legacy.prompt.md'), 'legacy prompt\n');
 
-    // Create legacy copilot-instructions.md with BMAD markers
+    // Create legacy copilot-instructions.md with WTK markers
     const copilotInstructionsPath17 = path.join(tempProjectDir17, '.github', 'copilot-instructions.md');
     await fs.writeFile(
       copilotInstructionsPath17,
-      'User content before\n<!-- BMAD:START -->\nBMAD generated content\n<!-- BMAD:END -->\nUser content after\n',
+      'User content before\n<!-- WTK:START -->\nWTK generated content\n<!-- WTK:END -->\nUser content after\n',
     );
 
     const ideManager17 = new IdeManager();
@@ -871,23 +869,23 @@ async function runTests() {
 
     assert(result17.success === true, 'GitHub Copilot setup succeeds against temp project');
 
-    const skillFile17 = path.join(tempProjectDir17, '.github', 'skills', 'bmad-master', 'SKILL.md');
+    const skillFile17 = path.join(tempProjectDir17, '.github', 'skills', 'wtk-master', 'SKILL.md');
     assert(await fs.pathExists(skillFile17), 'GitHub Copilot install writes SKILL.md directory output');
 
     // Verify name frontmatter matches directory name
     const skillContent17 = await fs.readFile(skillFile17, 'utf8');
     const nameMatch17 = skillContent17.match(/^name:\s*(.+)$/m);
-    assert(nameMatch17 && nameMatch17[1].trim() === 'bmad-master', 'GitHub Copilot skill name frontmatter matches directory name exactly');
+    assert(nameMatch17 && nameMatch17[1].trim() === 'wtk-master', 'GitHub Copilot skill name frontmatter matches directory name exactly');
 
     assert(!(await fs.pathExists(legacyAgentsDir17)), 'GitHub Copilot setup removes legacy agents dir');
 
     assert(!(await fs.pathExists(legacyPromptsDir17)), 'GitHub Copilot setup removes legacy prompts dir');
 
-    // Verify copilot-instructions.md BMAD markers were stripped but user content preserved
+    // Verify copilot-instructions.md WTK markers were stripped but user content preserved
     const cleanedInstructions17 = await fs.readFile(copilotInstructionsPath17, 'utf8');
     assert(
-      !cleanedInstructions17.includes('BMAD:START') && !cleanedInstructions17.includes('BMAD generated content'),
-      'GitHub Copilot setup strips BMAD markers from copilot-instructions.md',
+      !cleanedInstructions17.includes('WTK:START') && !cleanedInstructions17.includes('WTK generated content'),
+      'GitHub Copilot setup strips WTK markers from copilot-instructions.md',
     );
     assert(
       cleanedInstructions17.includes('User content before') && cleanedInstructions17.includes('User content after'),
@@ -921,11 +919,11 @@ async function runTests() {
       'Cline installer cleans legacy workflow output',
     );
 
-    const tempProjectDir18 = await fs.mkdtemp(path.join(os.tmpdir(), 'bmad-cline-test-'));
+    const tempProjectDir18 = await fs.mkdtemp(path.join(os.tmpdir(), 'wtk-cline-test-'));
     const installedBmadDir18 = await createTestBmadFixture();
-    const legacyDir18 = path.join(tempProjectDir18, '.clinerules', 'workflows', 'bmad-legacy-dir');
+    const legacyDir18 = path.join(tempProjectDir18, '.clinerules', 'workflows', 'wtk-legacy-dir');
     await fs.ensureDir(legacyDir18);
-    await fs.writeFile(path.join(tempProjectDir18, '.clinerules', 'workflows', 'bmad-legacy.md'), 'legacy\n');
+    await fs.writeFile(path.join(tempProjectDir18, '.clinerules', 'workflows', 'wtk-legacy.md'), 'legacy\n');
     await fs.writeFile(path.join(legacyDir18, 'SKILL.md'), 'legacy\n');
 
     const ideManager18 = new IdeManager();
@@ -937,13 +935,13 @@ async function runTests() {
 
     assert(result18.success === true, 'Cline setup succeeds against temp project');
 
-    const skillFile18 = path.join(tempProjectDir18, '.cline', 'skills', 'bmad-master', 'SKILL.md');
+    const skillFile18 = path.join(tempProjectDir18, '.cline', 'skills', 'wtk-master', 'SKILL.md');
     assert(await fs.pathExists(skillFile18), 'Cline install writes SKILL.md directory output');
 
     // Verify name frontmatter matches directory name
     const skillContent18 = await fs.readFile(skillFile18, 'utf8');
     const nameMatch18 = skillContent18.match(/^name:\s*(.+)$/m);
-    assert(nameMatch18 && nameMatch18[1].trim() === 'bmad-master', 'Cline skill name frontmatter matches directory name exactly');
+    assert(nameMatch18 && nameMatch18[1].trim() === 'wtk-master', 'Cline skill name frontmatter matches directory name exactly');
 
     assert(!(await fs.pathExists(path.join(tempProjectDir18, '.clinerules', 'workflows'))), 'Cline setup removes legacy workflows dir');
 
@@ -983,11 +981,11 @@ async function runTests() {
       'CodeBuddy installer cleans legacy command output',
     );
 
-    const tempProjectDir19 = await fs.mkdtemp(path.join(os.tmpdir(), 'bmad-codebuddy-test-'));
+    const tempProjectDir19 = await fs.mkdtemp(path.join(os.tmpdir(), 'wtk-codebuddy-test-'));
     const installedBmadDir19 = await createTestBmadFixture();
-    const legacyDir19 = path.join(tempProjectDir19, '.codebuddy', 'commands', 'bmad-legacy-dir');
+    const legacyDir19 = path.join(tempProjectDir19, '.codebuddy', 'commands', 'wtk-legacy-dir');
     await fs.ensureDir(legacyDir19);
-    await fs.writeFile(path.join(tempProjectDir19, '.codebuddy', 'commands', 'bmad-legacy.md'), 'legacy\n');
+    await fs.writeFile(path.join(tempProjectDir19, '.codebuddy', 'commands', 'wtk-legacy.md'), 'legacy\n');
     await fs.writeFile(path.join(legacyDir19, 'SKILL.md'), 'legacy\n');
 
     const ideManager19 = new IdeManager();
@@ -999,12 +997,12 @@ async function runTests() {
 
     assert(result19.success === true, 'CodeBuddy setup succeeds against temp project');
 
-    const skillFile19 = path.join(tempProjectDir19, '.codebuddy', 'skills', 'bmad-master', 'SKILL.md');
+    const skillFile19 = path.join(tempProjectDir19, '.codebuddy', 'skills', 'wtk-master', 'SKILL.md');
     assert(await fs.pathExists(skillFile19), 'CodeBuddy install writes SKILL.md directory output');
 
     const skillContent19 = await fs.readFile(skillFile19, 'utf8');
     const nameMatch19 = skillContent19.match(/^name:\s*(.+)$/m);
-    assert(nameMatch19 && nameMatch19[1].trim() === 'bmad-master', 'CodeBuddy skill name frontmatter matches directory name exactly');
+    assert(nameMatch19 && nameMatch19[1].trim() === 'wtk-master', 'CodeBuddy skill name frontmatter matches directory name exactly');
 
     assert(!(await fs.pathExists(path.join(tempProjectDir19, '.codebuddy', 'commands'))), 'CodeBuddy setup removes legacy commands dir');
 
@@ -1043,11 +1041,11 @@ async function runTests() {
       'Crush installer cleans legacy command output',
     );
 
-    const tempProjectDir20 = await fs.mkdtemp(path.join(os.tmpdir(), 'bmad-crush-test-'));
+    const tempProjectDir20 = await fs.mkdtemp(path.join(os.tmpdir(), 'wtk-crush-test-'));
     const installedBmadDir20 = await createTestBmadFixture();
-    const legacyDir20 = path.join(tempProjectDir20, '.crush', 'commands', 'bmad-legacy-dir');
+    const legacyDir20 = path.join(tempProjectDir20, '.crush', 'commands', 'wtk-legacy-dir');
     await fs.ensureDir(legacyDir20);
-    await fs.writeFile(path.join(tempProjectDir20, '.crush', 'commands', 'bmad-legacy.md'), 'legacy\n');
+    await fs.writeFile(path.join(tempProjectDir20, '.crush', 'commands', 'wtk-legacy.md'), 'legacy\n');
     await fs.writeFile(path.join(legacyDir20, 'SKILL.md'), 'legacy\n');
 
     const ideManager20 = new IdeManager();
@@ -1059,12 +1057,12 @@ async function runTests() {
 
     assert(result20.success === true, 'Crush setup succeeds against temp project');
 
-    const skillFile20 = path.join(tempProjectDir20, '.crush', 'skills', 'bmad-master', 'SKILL.md');
+    const skillFile20 = path.join(tempProjectDir20, '.crush', 'skills', 'wtk-master', 'SKILL.md');
     assert(await fs.pathExists(skillFile20), 'Crush install writes SKILL.md directory output');
 
     const skillContent20 = await fs.readFile(skillFile20, 'utf8');
     const nameMatch20 = skillContent20.match(/^name:\s*(.+)$/m);
-    assert(nameMatch20 && nameMatch20[1].trim() === 'bmad-master', 'Crush skill name frontmatter matches directory name exactly');
+    assert(nameMatch20 && nameMatch20[1].trim() === 'wtk-master', 'Crush skill name frontmatter matches directory name exactly');
 
     assert(!(await fs.pathExists(path.join(tempProjectDir20, '.crush', 'commands'))), 'Crush setup removes legacy commands dir');
 
@@ -1103,11 +1101,11 @@ async function runTests() {
       'Trae installer cleans legacy rules output',
     );
 
-    const tempProjectDir21 = await fs.mkdtemp(path.join(os.tmpdir(), 'bmad-trae-test-'));
+    const tempProjectDir21 = await fs.mkdtemp(path.join(os.tmpdir(), 'wtk-trae-test-'));
     const installedBmadDir21 = await createTestBmadFixture();
     const legacyDir21 = path.join(tempProjectDir21, '.trae', 'rules');
     await fs.ensureDir(legacyDir21);
-    await fs.writeFile(path.join(legacyDir21, 'bmad-legacy.md'), 'legacy\n');
+    await fs.writeFile(path.join(legacyDir21, 'wtk-legacy.md'), 'legacy\n');
 
     const ideManager21 = new IdeManager();
     await ideManager21.ensureInitialized();
@@ -1118,12 +1116,12 @@ async function runTests() {
 
     assert(result21.success === true, 'Trae setup succeeds against temp project');
 
-    const skillFile21 = path.join(tempProjectDir21, '.trae', 'skills', 'bmad-master', 'SKILL.md');
+    const skillFile21 = path.join(tempProjectDir21, '.trae', 'skills', 'wtk-master', 'SKILL.md');
     assert(await fs.pathExists(skillFile21), 'Trae install writes SKILL.md directory output');
 
     const skillContent21 = await fs.readFile(skillFile21, 'utf8');
     const nameMatch21 = skillContent21.match(/^name:\s*(.+)$/m);
-    assert(nameMatch21 && nameMatch21[1].trim() === 'bmad-master', 'Trae skill name frontmatter matches directory name exactly');
+    assert(nameMatch21 && nameMatch21[1].trim() === 'wtk-master', 'Trae skill name frontmatter matches directory name exactly');
 
     assert(!(await fs.pathExists(path.join(tempProjectDir21, '.trae', 'rules'))), 'Trae setup removes legacy rules dir');
 
@@ -1165,13 +1163,13 @@ async function runTests() {
     assert(!availableIdes22.some((ide) => ide.value === 'kilo'), 'KiloCoder is hidden from IDE selection');
 
     // Setup should be blocked but legacy files should be cleaned up
-    const tempProjectDir22 = await fs.mkdtemp(path.join(os.tmpdir(), 'bmad-kilo-test-'));
+    const tempProjectDir22 = await fs.mkdtemp(path.join(os.tmpdir(), 'wtk-kilo-test-'));
     const installedBmadDir22 = await createTestBmadFixture();
 
     // Pre-populate legacy Kilo artifacts that should be cleaned up
     const legacyDir22 = path.join(tempProjectDir22, '.kilocode', 'workflows');
     await fs.ensureDir(legacyDir22);
-    await fs.writeFile(path.join(legacyDir22, 'bmad-legacy.md'), 'legacy\n');
+    await fs.writeFile(path.join(legacyDir22, 'wtk-legacy.md'), 'legacy\n');
 
     const result22 = await ideManager22.setup('kilo', tempProjectDir22, installedBmadDir22, {
       silent: true,
@@ -1220,11 +1218,11 @@ async function runTests() {
       'Gemini installer cleans legacy commands output',
     );
 
-    const tempProjectDir23 = await fs.mkdtemp(path.join(os.tmpdir(), 'bmad-gemini-test-'));
+    const tempProjectDir23 = await fs.mkdtemp(path.join(os.tmpdir(), 'wtk-gemini-test-'));
     const installedBmadDir23 = await createTestBmadFixture();
     const legacyDir23 = path.join(tempProjectDir23, '.gemini', 'commands');
     await fs.ensureDir(legacyDir23);
-    await fs.writeFile(path.join(legacyDir23, 'bmad-legacy.toml'), 'legacy\n');
+    await fs.writeFile(path.join(legacyDir23, 'wtk-legacy.toml'), 'legacy\n');
 
     const ideManager23 = new IdeManager();
     await ideManager23.ensureInitialized();
@@ -1235,12 +1233,12 @@ async function runTests() {
 
     assert(result23.success === true, 'Gemini setup succeeds against temp project');
 
-    const skillFile23 = path.join(tempProjectDir23, '.gemini', 'skills', 'bmad-master', 'SKILL.md');
+    const skillFile23 = path.join(tempProjectDir23, '.gemini', 'skills', 'wtk-master', 'SKILL.md');
     assert(await fs.pathExists(skillFile23), 'Gemini install writes SKILL.md directory output');
 
     const skillContent23 = await fs.readFile(skillFile23, 'utf8');
     const nameMatch23 = skillContent23.match(/^name:\s*(.+)$/m);
-    assert(nameMatch23 && nameMatch23[1].trim() === 'bmad-master', 'Gemini skill name frontmatter matches directory name exactly');
+    assert(nameMatch23 && nameMatch23[1].trim() === 'wtk-master', 'Gemini skill name frontmatter matches directory name exactly');
 
     assert(!(await fs.pathExists(path.join(tempProjectDir23, '.gemini', 'commands'))), 'Gemini setup removes legacy commands dir');
 
@@ -1277,11 +1275,11 @@ async function runTests() {
       'iFlow installer cleans legacy commands output',
     );
 
-    const tempProjectDir24 = await fs.mkdtemp(path.join(os.tmpdir(), 'bmad-iflow-test-'));
+    const tempProjectDir24 = await fs.mkdtemp(path.join(os.tmpdir(), 'wtk-iflow-test-'));
     const installedBmadDir24 = await createTestBmadFixture();
     const legacyDir24 = path.join(tempProjectDir24, '.iflow', 'commands');
     await fs.ensureDir(legacyDir24);
-    await fs.writeFile(path.join(legacyDir24, 'bmad-legacy.md'), 'legacy\n');
+    await fs.writeFile(path.join(legacyDir24, 'wtk-legacy.md'), 'legacy\n');
 
     const ideManager24 = new IdeManager();
     await ideManager24.ensureInitialized();
@@ -1292,13 +1290,13 @@ async function runTests() {
 
     assert(result24.success === true, 'iFlow setup succeeds against temp project');
 
-    const skillFile24 = path.join(tempProjectDir24, '.iflow', 'skills', 'bmad-master', 'SKILL.md');
+    const skillFile24 = path.join(tempProjectDir24, '.iflow', 'skills', 'wtk-master', 'SKILL.md');
     assert(await fs.pathExists(skillFile24), 'iFlow install writes SKILL.md directory output');
 
     // Verify name frontmatter matches directory name
     const skillContent24 = await fs.readFile(skillFile24, 'utf8');
     const nameMatch24 = skillContent24.match(/^name:\s*(.+)$/m);
-    assert(nameMatch24 && nameMatch24[1].trim() === 'bmad-master', 'iFlow skill name frontmatter matches directory name exactly');
+    assert(nameMatch24 && nameMatch24[1].trim() === 'wtk-master', 'iFlow skill name frontmatter matches directory name exactly');
 
     assert(!(await fs.pathExists(path.join(tempProjectDir24, '.iflow', 'commands'))), 'iFlow setup removes legacy commands dir');
 
@@ -1327,11 +1325,11 @@ async function runTests() {
       'QwenCoder installer cleans legacy commands output',
     );
 
-    const tempProjectDir25 = await fs.mkdtemp(path.join(os.tmpdir(), 'bmad-qwen-test-'));
+    const tempProjectDir25 = await fs.mkdtemp(path.join(os.tmpdir(), 'wtk-qwen-test-'));
     const installedBmadDir25 = await createTestBmadFixture();
     const legacyDir25 = path.join(tempProjectDir25, '.qwen', 'commands');
     await fs.ensureDir(legacyDir25);
-    await fs.writeFile(path.join(legacyDir25, 'bmad-legacy.md'), 'legacy\n');
+    await fs.writeFile(path.join(legacyDir25, 'wtk-legacy.md'), 'legacy\n');
 
     const ideManager25 = new IdeManager();
     await ideManager25.ensureInitialized();
@@ -1342,13 +1340,13 @@ async function runTests() {
 
     assert(result25.success === true, 'QwenCoder setup succeeds against temp project');
 
-    const skillFile25 = path.join(tempProjectDir25, '.qwen', 'skills', 'bmad-master', 'SKILL.md');
+    const skillFile25 = path.join(tempProjectDir25, '.qwen', 'skills', 'wtk-master', 'SKILL.md');
     assert(await fs.pathExists(skillFile25), 'QwenCoder install writes SKILL.md directory output');
 
     // Verify name frontmatter matches directory name
     const skillContent25 = await fs.readFile(skillFile25, 'utf8');
     const nameMatch25 = skillContent25.match(/^name:\s*(.+)$/m);
-    assert(nameMatch25 && nameMatch25[1].trim() === 'bmad-master', 'QwenCoder skill name frontmatter matches directory name exactly');
+    assert(nameMatch25 && nameMatch25[1].trim() === 'wtk-master', 'QwenCoder skill name frontmatter matches directory name exactly');
 
     assert(!(await fs.pathExists(path.join(tempProjectDir25, '.qwen', 'commands'))), 'QwenCoder setup removes legacy commands dir');
 
@@ -1377,18 +1375,18 @@ async function runTests() {
       'Rovo Dev installer cleans legacy workflows output',
     );
 
-    const tempProjectDir26 = await fs.mkdtemp(path.join(os.tmpdir(), 'bmad-rovodev-test-'));
+    const tempProjectDir26 = await fs.mkdtemp(path.join(os.tmpdir(), 'wtk-rovodev-test-'));
     const installedBmadDir26 = await createTestBmadFixture();
     const legacyDir26 = path.join(tempProjectDir26, '.rovodev', 'workflows');
     await fs.ensureDir(legacyDir26);
-    await fs.writeFile(path.join(legacyDir26, 'bmad-legacy.md'), 'legacy\n');
+    await fs.writeFile(path.join(legacyDir26, 'wtk-legacy.md'), 'legacy\n');
 
-    // Create a prompts.yml with BMAD entries and a user entry
+    // Create a prompts.yml with WTK entries and a user entry
     const yaml26 = require('yaml');
     const promptsPath26 = path.join(tempProjectDir26, '.rovodev', 'prompts.yml');
     const promptsContent26 = yaml26.stringify({
       prompts: [
-        { name: 'bmad-bmm-create-prd', description: 'BMAD workflow', content_file: 'workflows/bmad-bmm-create-prd.md' },
+        { name: 'wtk-bmm-create-prd', description: 'WTK workflow', content_file: 'workflows/wtk-bmm-create-prd.md' },
         { name: 'my-custom-prompt', description: 'User prompt', content_file: 'custom.md' },
       ],
     });
@@ -1403,23 +1401,23 @@ async function runTests() {
 
     assert(result26.success === true, 'Rovo Dev setup succeeds against temp project');
 
-    const skillFile26 = path.join(tempProjectDir26, '.rovodev', 'skills', 'bmad-master', 'SKILL.md');
+    const skillFile26 = path.join(tempProjectDir26, '.rovodev', 'skills', 'wtk-master', 'SKILL.md');
     assert(await fs.pathExists(skillFile26), 'Rovo Dev install writes SKILL.md directory output');
 
     // Verify name frontmatter matches directory name
     const skillContent26 = await fs.readFile(skillFile26, 'utf8');
     const nameMatch26 = skillContent26.match(/^name:\s*(.+)$/m);
-    assert(nameMatch26 && nameMatch26[1].trim() === 'bmad-master', 'Rovo Dev skill name frontmatter matches directory name exactly');
+    assert(nameMatch26 && nameMatch26[1].trim() === 'wtk-master', 'Rovo Dev skill name frontmatter matches directory name exactly');
 
     assert(!(await fs.pathExists(path.join(tempProjectDir26, '.rovodev', 'workflows'))), 'Rovo Dev setup removes legacy workflows dir');
 
-    // Verify prompts.yml cleanup: BMAD entries removed, user entry preserved
+    // Verify prompts.yml cleanup: WTK entries removed, user entry preserved
     const cleanedPrompts26 = yaml26.parse(await fs.readFile(promptsPath26, 'utf8'));
     assert(
       Array.isArray(cleanedPrompts26.prompts) && cleanedPrompts26.prompts.length === 1,
-      'Rovo Dev cleanup removes BMAD entries from prompts.yml',
+      'Rovo Dev cleanup removes WTK entries from prompts.yml',
     );
-    assert(cleanedPrompts26.prompts[0].name === 'my-custom-prompt', 'Rovo Dev cleanup preserves non-BMAD entries in prompts.yml');
+    assert(cleanedPrompts26.prompts[0].name === 'my-custom-prompt', 'Rovo Dev cleanup preserves non-WTK entries in prompts.yml');
 
     await fs.remove(tempProjectDir26);
     await fs.remove(installedBmadDir26);
@@ -1430,35 +1428,35 @@ async function runTests() {
   console.log('');
 
   // ============================================================
-  // Suite 27: Cleanup preserves bmad-os-* skills
+  // Suite 27: Cleanup preserves wtk-os-* skills
   // ============================================================
-  console.log(`${colors.yellow}Test Suite 27: Cleanup preserves bmad-os-* skills${colors.reset}\n`);
+  console.log(`${colors.yellow}Test Suite 27: Cleanup preserves wtk-os-* skills${colors.reset}\n`);
 
   try {
-    const tempProjectDir27 = await fs.mkdtemp(path.join(os.tmpdir(), 'bmad-os-preserve-test-'));
+    const tempProjectDir27 = await fs.mkdtemp(path.join(os.tmpdir(), 'wtk-os-preserve-test-'));
     const installedBmadDir27 = await createTestBmadFixture();
 
-    // Pre-populate .claude/skills with bmad-os-* skills (version-controlled repo skills)
-    const osSkillDir27 = path.join(tempProjectDir27, '.claude', 'skills', 'bmad-os-review-pr');
+    // Pre-populate .claude/skills with wtk-os-* skills (version-controlled repo skills)
+    const osSkillDir27 = path.join(tempProjectDir27, '.claude', 'skills', 'wtk-os-review-pr');
     await fs.ensureDir(osSkillDir27);
     await fs.writeFile(
       path.join(osSkillDir27, 'SKILL.md'),
-      '---\nname: bmad-os-review-pr\ndescription: Review PRs\n---\nOS skill content\n',
+      '---\nname: wtk-os-review-pr\ndescription: Review PRs\n---\nOS skill content\n',
     );
 
-    const osSkillDir27b = path.join(tempProjectDir27, '.claude', 'skills', 'bmad-os-release-module');
+    const osSkillDir27b = path.join(tempProjectDir27, '.claude', 'skills', 'wtk-os-release-module');
     await fs.ensureDir(osSkillDir27b);
     await fs.writeFile(
       path.join(osSkillDir27b, 'SKILL.md'),
-      '---\nname: bmad-os-release-module\ndescription: Release module\n---\nOS skill content\n',
+      '---\nname: wtk-os-release-module\ndescription: Release module\n---\nOS skill content\n',
     );
 
     // Also add a regular bmad skill that SHOULD be cleaned up
-    const regularSkillDir27 = path.join(tempProjectDir27, '.claude', 'skills', 'bmad-architect');
+    const regularSkillDir27 = path.join(tempProjectDir27, '.claude', 'skills', 'wtk-architect');
     await fs.ensureDir(regularSkillDir27);
     await fs.writeFile(
       path.join(regularSkillDir27, 'SKILL.md'),
-      '---\nname: bmad-architect\ndescription: Architect\n---\nOld skill content\n',
+      '---\nname: wtk-architect\ndescription: Architect\n---\nOld skill content\n',
     );
 
     // Run Claude Code setup (which triggers cleanup then install)
@@ -1469,27 +1467,27 @@ async function runTests() {
       selectedModules: ['bmm'],
     });
 
-    assert(result27.success === true, 'Claude Code setup succeeds with bmad-os-* skills present');
+    assert(result27.success === true, 'Claude Code setup succeeds with wtk-os-* skills present');
 
-    // bmad-os-* skills must survive
-    assert(await fs.pathExists(osSkillDir27), 'Cleanup preserves bmad-os-review-pr skill');
-    assert(await fs.pathExists(osSkillDir27b), 'Cleanup preserves bmad-os-release-module skill');
+    // wtk-os-* skills must survive
+    assert(await fs.pathExists(osSkillDir27), 'Cleanup preserves wtk-os-review-pr skill');
+    assert(await fs.pathExists(osSkillDir27b), 'Cleanup preserves wtk-os-release-module skill');
 
-    // bmad-os skill content must be untouched
+    // wtk-os skill content must be untouched
     const osContent27 = await fs.readFile(path.join(osSkillDir27, 'SKILL.md'), 'utf8');
-    assert(osContent27.includes('OS skill content'), 'bmad-os-review-pr skill content is unchanged');
+    assert(osContent27.includes('OS skill content'), 'wtk-os-review-pr skill content is unchanged');
 
     // Regular bmad skill should have been replaced by fresh install
-    const newSkillFile27 = path.join(tempProjectDir27, '.claude', 'skills', 'bmad-master', 'SKILL.md');
-    assert(await fs.pathExists(newSkillFile27), 'Fresh bmad skills are installed alongside preserved bmad-os-* skills');
+    const newSkillFile27 = path.join(tempProjectDir27, '.claude', 'skills', 'wtk-master', 'SKILL.md');
+    assert(await fs.pathExists(newSkillFile27), 'Fresh WTK skills are installed alongside preserved wtk-os-* skills');
 
-    // Stale non-bmad-os skill must have been removed by cleanup
-    assert(!(await fs.pathExists(regularSkillDir27)), 'Cleanup removes stale non-bmad-os skills');
+    // Stale non-wtk-os skill must have been removed by cleanup
+    assert(!(await fs.pathExists(regularSkillDir27)), 'Cleanup removes stale non-wtk-os skills');
 
     await fs.remove(tempProjectDir27);
     await fs.remove(installedBmadDir27);
   } catch (error) {
-    assert(false, 'bmad-os-* skill preservation test succeeds', error.message);
+    assert(false, 'wtk-os-* skill preservation test succeeds', error.message);
   }
 
   console.log('');
@@ -1510,7 +1508,7 @@ async function runTests() {
     assert(piInstaller?.skill_format === true, 'Pi installer enables native skill output');
     assert(piInstaller?.template_type === 'default', 'Pi installer uses default skill template');
 
-    tempProjectDir28 = await fs.mkdtemp(path.join(os.tmpdir(), 'bmad-pi-test-'));
+    tempProjectDir28 = await fs.mkdtemp(path.join(os.tmpdir(), 'wtk-pi-test-'));
     installedBmadDir28 = await createTestBmadFixture();
 
     const ideManager28 = new IdeManager();
@@ -1538,7 +1536,7 @@ async function runTests() {
     const detectedAfter28 = await ideManager28.detectInstalledIdes(tempProjectDir28);
     assert(detectedAfter28.includes('pi'), 'Pi is detected after install');
 
-    const skillFile28 = path.join(tempProjectDir28, '.pi', 'skills', 'bmad-master', 'SKILL.md');
+    const skillFile28 = path.join(tempProjectDir28, '.pi', 'skills', 'wtk-master', 'SKILL.md');
     assert(await fs.pathExists(skillFile28), 'Pi install writes SKILL.md directory output');
 
     // Parse YAML frontmatter between --- markers
@@ -1551,7 +1549,7 @@ async function runTests() {
 
     // Verify name in frontmatter matches directory name
     const fmName28 = frontmatter28.match(/^name:\s*(.+)$/m);
-    assert(fmName28 && fmName28[1].trim() === 'bmad-master', 'Pi skill name frontmatter matches directory name exactly');
+    assert(fmName28 && fmName28[1].trim() === 'wtk-master', 'Pi skill name frontmatter matches directory name exactly');
 
     // Verify description exists and is non-empty
     const fmDesc28 = frontmatter28.match(/^description:\s*(.+)$/m);
@@ -1591,7 +1589,7 @@ async function runTests() {
 
   let tempFixture29;
   try {
-    tempFixture29 = await fs.mkdtemp(path.join(os.tmpdir(), 'bmad-skill-scanner-'));
+    tempFixture29 = await fs.mkdtemp(path.join(os.tmpdir(), 'wtk-skill-scanner-'));
 
     // Create _config dir (required by manifest generator)
     await fs.ensureDir(path.join(tempFixture29, '_config'));
@@ -1599,7 +1597,7 @@ async function runTests() {
     // --- Skill at unusual path: core/custom-area/my-skill/ ---
     const skillDir29 = path.join(tempFixture29, 'core', 'custom-area', 'my-skill');
     await fs.ensureDir(skillDir29);
-    await fs.writeFile(path.join(skillDir29, 'bmad-skill-manifest.yaml'), 'type: skill\n');
+    await fs.writeFile(path.join(skillDir29, 'wtk-skill-manifest.yaml'), 'type: skill\n');
     await fs.writeFile(
       path.join(skillDir29, 'SKILL.md'),
       '---\nname: my-skill\ndescription: A skill at an unusual path\n---\n\nFollow the instructions in [workflow.md](workflow.md).\n',
@@ -1609,7 +1607,7 @@ async function runTests() {
     // --- Regular workflow dir: core/workflows/regular-wf/ (type: workflow) ---
     const wfDir29 = path.join(tempFixture29, 'core', 'workflows', 'regular-wf');
     await fs.ensureDir(wfDir29);
-    await fs.writeFile(path.join(wfDir29, 'bmad-skill-manifest.yaml'), 'type: workflow\ncanonicalId: regular-wf\n');
+    await fs.writeFile(path.join(wfDir29, 'wtk-skill-manifest.yaml'), 'type: workflow\ncanonicalId: regular-wf\n');
     await fs.writeFile(
       path.join(wfDir29, 'workflow.md'),
       '---\nname: Regular Workflow\ndescription: A regular workflow not a skill\n---\n\nWorkflow body\n',
@@ -1618,7 +1616,7 @@ async function runTests() {
     // --- Skill inside workflows/ dir: core/workflows/wf-skill/ (exercises findWorkflows skip logic) ---
     const wfSkillDir29 = path.join(tempFixture29, 'core', 'workflows', 'wf-skill');
     await fs.ensureDir(wfSkillDir29);
-    await fs.writeFile(path.join(wfSkillDir29, 'bmad-skill-manifest.yaml'), 'type: skill\n');
+    await fs.writeFile(path.join(wfSkillDir29, 'wtk-skill-manifest.yaml'), 'type: skill\n');
     await fs.writeFile(
       path.join(wfSkillDir29, 'SKILL.md'),
       '---\nname: wf-skill\ndescription: A skill inside workflows dir\n---\n\nFollow the instructions in [workflow.md](workflow.md).\n',
@@ -1628,20 +1626,20 @@ async function runTests() {
     // --- Skill inside tasks/ dir: core/tasks/task-skill/ ---
     const taskSkillDir29 = path.join(tempFixture29, 'core', 'tasks', 'task-skill');
     await fs.ensureDir(taskSkillDir29);
-    await fs.writeFile(path.join(taskSkillDir29, 'bmad-skill-manifest.yaml'), 'type: skill\n');
+    await fs.writeFile(path.join(taskSkillDir29, 'wtk-skill-manifest.yaml'), 'type: skill\n');
     await fs.writeFile(
       path.join(taskSkillDir29, 'SKILL.md'),
       '---\nname: task-skill\ndescription: A skill inside tasks dir\n---\n\nFollow the instructions in [workflow.md](workflow.md).\n',
     );
     await fs.writeFile(path.join(taskSkillDir29, 'workflow.md'), '# Task Skill\n\nSkill in tasks\n');
 
-    // --- Native agent entrypoint inside agents/: core/agents/bmad-tea/ ---
-    const nativeAgentDir29 = path.join(tempFixture29, 'core', 'agents', 'bmad-tea');
+    // --- Native agent entrypoint inside agents/: core/agents/wtk-tea/ ---
+    const nativeAgentDir29 = path.join(tempFixture29, 'core', 'agents', 'wtk-tea');
     await fs.ensureDir(nativeAgentDir29);
-    await fs.writeFile(path.join(nativeAgentDir29, 'bmad-skill-manifest.yaml'), 'type: agent\ncanonicalId: bmad-tea\n');
+    await fs.writeFile(path.join(nativeAgentDir29, 'wtk-skill-manifest.yaml'), 'type: agent\ncanonicalId: wtk-tea\n');
     await fs.writeFile(
       path.join(nativeAgentDir29, 'SKILL.md'),
-      '---\nname: bmad-tea\ndescription: Native agent entrypoint\n---\n\nPresent a capability menu.\n',
+      '---\nname: wtk-tea\ndescription: Native agent entrypoint\n---\n\nPresent a capability menu.\n',
     );
 
     // Minimal agent so core module is detected
@@ -1675,13 +1673,13 @@ async function runTests() {
 
     // Native agent entrypoint should be installed as a verbatim skill and also
     // remain visible to the agent manifest pipeline.
-    const nativeAgentEntry29 = generator29.skills.find((s) => s.canonicalId === 'bmad-tea');
+    const nativeAgentEntry29 = generator29.skills.find((s) => s.canonicalId === 'wtk-tea');
     assert(nativeAgentEntry29 !== undefined, 'Native type:agent SKILL.md dir appears in skills[]');
     assert(
-      nativeAgentEntry29 && nativeAgentEntry29.path.includes('agents/bmad-tea/SKILL.md'),
+      nativeAgentEntry29 && nativeAgentEntry29.path.includes('agents/wtk-tea/SKILL.md'),
       'Native type:agent SKILL.md path points to the agent directory entrypoint',
     );
-    const nativeAgentManifest29 = generator29.agents.find((a) => a.name === 'bmad-tea');
+    const nativeAgentManifest29 = generator29.agents.find((a) => a.name === 'wtk-tea');
     assert(nativeAgentManifest29 !== undefined, 'Native type:agent SKILL.md dir appears in agents[] for agent metadata');
 
     // Regular workflow should be in workflows, NOT in skills
@@ -1700,7 +1698,7 @@ async function runTests() {
     // Test scanInstalledModules recognizes skill-only modules
     const skillOnlyModDir29 = path.join(tempFixture29, 'skill-only-mod');
     await fs.ensureDir(path.join(skillOnlyModDir29, 'deep', 'nested', 'my-skill'));
-    await fs.writeFile(path.join(skillOnlyModDir29, 'deep', 'nested', 'my-skill', 'bmad-skill-manifest.yaml'), 'type: skill\n');
+    await fs.writeFile(path.join(skillOnlyModDir29, 'deep', 'nested', 'my-skill', 'wtk-skill-manifest.yaml'), 'type: skill\n');
     await fs.writeFile(
       path.join(skillOnlyModDir29, 'deep', 'nested', 'my-skill', 'SKILL.md'),
       '---\nname: my-skill\ndescription: desc\n---\n\nFollow the instructions in [workflow.md](workflow.md).\n',
@@ -1712,11 +1710,11 @@ async function runTests() {
 
     // Test scanInstalledModules recognizes native-agent-only modules too
     const agentOnlyModDir29 = path.join(tempFixture29, 'agent-only-mod');
-    await fs.ensureDir(path.join(agentOnlyModDir29, 'deep', 'nested', 'bmad-tea'));
-    await fs.writeFile(path.join(agentOnlyModDir29, 'deep', 'nested', 'bmad-tea', 'bmad-skill-manifest.yaml'), 'type: agent\n');
+    await fs.ensureDir(path.join(agentOnlyModDir29, 'deep', 'nested', 'wtk-tea'));
+    await fs.writeFile(path.join(agentOnlyModDir29, 'deep', 'nested', 'wtk-tea', 'wtk-skill-manifest.yaml'), 'type: agent\n');
     await fs.writeFile(
-      path.join(agentOnlyModDir29, 'deep', 'nested', 'bmad-tea', 'SKILL.md'),
-      '---\nname: bmad-tea\ndescription: desc\n---\n\nAgent menu.\n',
+      path.join(agentOnlyModDir29, 'deep', 'nested', 'wtk-tea', 'SKILL.md'),
+      '---\nname: wtk-tea\ndescription: desc\n---\n\nAgent menu.\n',
     );
 
     const rescannedModules29 = await generator29.scanInstalledModules(tempFixture29);
@@ -1724,14 +1722,14 @@ async function runTests() {
 
     // Test scanInstalledModules recognizes multi-entry manifests keyed under SKILL.md
     const multiEntryModDir29 = path.join(tempFixture29, 'multi-entry-mod');
-    await fs.ensureDir(path.join(multiEntryModDir29, 'deep', 'nested', 'bmad-tea'));
+    await fs.ensureDir(path.join(multiEntryModDir29, 'deep', 'nested', 'wtk-tea'));
     await fs.writeFile(
-      path.join(multiEntryModDir29, 'deep', 'nested', 'bmad-tea', 'bmad-skill-manifest.yaml'),
-      'SKILL.md:\n  type: agent\n  canonicalId: bmad-tea\n',
+      path.join(multiEntryModDir29, 'deep', 'nested', 'wtk-tea', 'wtk-skill-manifest.yaml'),
+      'SKILL.md:\n  type: agent\n  canonicalId: wtk-tea\n',
     );
     await fs.writeFile(
-      path.join(multiEntryModDir29, 'deep', 'nested', 'bmad-tea', 'SKILL.md'),
-      '---\nname: bmad-tea\ndescription: desc\n---\n\nAgent menu.\n',
+      path.join(multiEntryModDir29, 'deep', 'nested', 'wtk-tea', 'SKILL.md'),
+      '---\nname: wtk-tea\ndescription: desc\n---\n\nAgent menu.\n',
     );
 
     const rescannedModules29b = await generator29.scanInstalledModules(tempFixture29);
@@ -1739,7 +1737,7 @@ async function runTests() {
 
     // skill-manifest.csv should include the native agent entrypoint
     const skillManifestCsv29 = await fs.readFile(path.join(tempFixture29, '_config', 'skill-manifest.csv'), 'utf8');
-    assert(skillManifestCsv29.includes('bmad-tea'), 'skill-manifest.csv includes native type:agent SKILL.md entrypoint');
+    assert(skillManifestCsv29.includes('wtk-tea'), 'skill-manifest.csv includes native type:agent SKILL.md entrypoint');
   } catch (error) {
     assert(false, 'Unified skill scanner test succeeds', error.message);
   } finally {
@@ -1755,10 +1753,10 @@ async function runTests() {
 
   let tempFixture30;
   try {
-    tempFixture30 = await fs.mkdtemp(path.join(os.tmpdir(), 'bmad-test-30-'));
+    tempFixture30 = await fs.mkdtemp(path.join(os.tmpdir(), 'wtk-test-30-'));
 
     const generator30 = new ManifestGenerator();
-    generator30.bmadFolderName = '_bmad';
+    generator30.wtkFolderName = '_wtk';
 
     // Case 1: Missing SKILL.md entirely
     const noSkillDir = path.join(tempFixture30, 'no-skill-md');
@@ -1827,11 +1825,11 @@ async function runTests() {
     clearCache();
     const collisionFixture = await createSkillCollisionFixture();
     collisionFixtureRoot = collisionFixture.root;
-    collisionProjectDir = await fs.mkdtemp(path.join(os.tmpdir(), 'bmad-antigravity-test-'));
+    collisionProjectDir = await fs.mkdtemp(path.join(os.tmpdir(), 'wtk-antigravity-test-'));
 
     const ideManager = new IdeManager();
     await ideManager.ensureInitialized();
-    const result = await ideManager.setup('antigravity', collisionProjectDir, collisionFixture.bmadDir, {
+    const result = await ideManager.setup('antigravity', collisionProjectDir, collisionFixture.wtkDir, {
       silent: true,
       selectedModules: ['core'],
     });
@@ -1843,11 +1841,11 @@ async function runTests() {
     assert(result.handlerResult.results.workflows === 1, 'Result retains generated workflow count');
     assert(result.handlerResult.results.skills === 1, 'Result retains verbatim skill count');
     assert(
-      await fs.pathExists(path.join(collisionProjectDir, '.agent', 'skills', 'bmad-agent-bmad-master', 'SKILL.md')),
+      await fs.pathExists(path.join(collisionProjectDir, '.agent', 'skills', 'wtk-agent-wtk-master', 'SKILL.md')),
       'Agent skill directory is created',
     );
     assert(
-      await fs.pathExists(path.join(collisionProjectDir, '.agent', 'skills', 'bmad-help', 'SKILL.md')),
+      await fs.pathExists(path.join(collisionProjectDir, '.agent', 'skills', 'wtk-help', 'SKILL.md')),
       'Overlapping skill directory is created once',
     );
   } catch (error) {
@@ -1875,7 +1873,7 @@ async function runTests() {
     assert(onaInstaller?.skill_format === true, 'Ona installer enables native skill output');
     assert(onaInstaller?.template_type === 'default', 'Ona installer uses default skill template');
 
-    tempProjectDir32 = await fs.mkdtemp(path.join(os.tmpdir(), 'bmad-ona-test-'));
+    tempProjectDir32 = await fs.mkdtemp(path.join(os.tmpdir(), 'wtk-ona-test-'));
     installedBmadDir32 = await createTestBmadFixture();
 
     const ideManager32 = new IdeManager();
@@ -1903,7 +1901,7 @@ async function runTests() {
     const detectedAfter32 = await ideManager32.detectInstalledIdes(tempProjectDir32);
     assert(detectedAfter32.includes('ona'), 'Ona is detected after install');
 
-    const skillFile32 = path.join(tempProjectDir32, '.ona', 'skills', 'bmad-master', 'SKILL.md');
+    const skillFile32 = path.join(tempProjectDir32, '.ona', 'skills', 'wtk-master', 'SKILL.md');
     assert(await fs.pathExists(skillFile32), 'Ona install writes SKILL.md directory output');
 
     // Parse YAML frontmatter between --- markers
@@ -1916,7 +1914,7 @@ async function runTests() {
 
     // Verify name in frontmatter matches directory name
     const fmName32 = frontmatter32.match(/^name:\s*(.+)$/m);
-    assert(fmName32 && fmName32[1].trim() === 'bmad-master', 'Ona skill name frontmatter matches directory name exactly');
+    assert(fmName32 && fmName32[1].trim() === 'wtk-master', 'Ona skill name frontmatter matches directory name exactly');
 
     // Verify description exists and is non-empty
     const fmDesc32 = frontmatter32.match(/^description:\s*(.+)$/m);

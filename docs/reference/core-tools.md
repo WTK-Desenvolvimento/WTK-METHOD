@@ -1,40 +1,40 @@
 ---
 title: Core Tools
-description: Reference for all built-in tasks and workflows available in every BMad installation without additional modules.
+description: Reference for all built-in tasks and workflows available in every Wtk installation without additional modules.
 sidebar:
   order: 2
 ---
 
-Every BMad installation includes a set of core skills that can be used in conjunction with any anything you are doing — standalone tasks and workflows that work across all projects, all modules, and all phases. These are always available regardless of which optional modules you install.
+Every Wtk installation includes a set of core skills that can be used in conjunction with any anything you are doing — standalone tasks and workflows that work across all projects, all modules, and all phases. These are always available regardless of which optional modules you install.
 
 :::tip[Quick Path]
-Run any core tool by typing its skill name (e.g., `bmad-help`) in your IDE. No agent session required.
+Run any core tool by typing its skill name (e.g., `wtk-help`) in your IDE. No agent session required.
 :::
 
 ## Overview
 
 | Tool | Type | Purpose |
 | --- | --- | --- |
-| [`bmad-help`](#bmad-help) | Task | Get context-aware guidance on what to do next |
-| [`bmad-brainstorming`](#bmad-brainstorming) | Workflow | Facilitate interactive brainstorming sessions |
-| [`bmad-party-mode`](#bmad-party-mode) | Workflow | Orchestrate multi-agent group discussions |
-| [`bmad-distillator`](#bmad-distillator) | Task | Lossless LLM-optimized compression of documents |
-| [`bmad-advanced-elicitation`](#bmad-advanced-elicitation) | Task | Push LLM output through iterative refinement methods |
-| [`bmad-review-adversarial-general`](#bmad-review-adversarial-general) | Task | Cynical review that finds what's missing and what's wrong |
-| [`bmad-review-edge-case-hunter`](#bmad-review-edge-case-hunter) | Task | Exhaustive branching-path analysis for unhandled edge cases |
-| [`bmad-editorial-review-prose`](#bmad-editorial-review-prose) | Task | Clinical copy-editing for communication clarity |
-| [`bmad-editorial-review-structure`](#bmad-editorial-review-structure) | Task | Structural editing — cuts, merges, and reorganization |
-| [`bmad-shard-doc`](#bmad-shard-doc) | Task | Split large markdown files into organized sections |
-| [`bmad-index-docs`](#bmad-index-docs) | Task | Generate or update an index of all docs in a folder |
+| [`wtk-help`](#wtk-help) | Task | Get context-aware guidance on what to do next |
+| [`wtk-brainstorming`](#wtk-brainstorming) | Workflow | Facilitate interactive brainstorming sessions |
+| [`wtk-party-mode`](#wtk-party-mode) | Workflow | Orchestrate multi-agent group discussions |
+| [`wtk-distillator`](#wtk-distillator) | Task | Lossless LLM-optimized compression of documents |
+| [`wtk-advanced-elicitation`](#wtk-advanced-elicitation) | Task | Push LLM output through iterative refinement methods |
+| [`wtk-review-adversarial-general`](#wtk-review-adversarial-general) | Task | Cynical review that finds what's missing and what's wrong |
+| [`wtk-review-edge-case-hunter`](#wtk-review-edge-case-hunter) | Task | Exhaustive branching-path analysis for unhandled edge cases |
+| [`wtk-editorial-review-prose`](#wtk-editorial-review-prose) | Task | Clinical copy-editing for communication clarity |
+| [`wtk-editorial-review-structure`](#wtk-editorial-review-structure) | Task | Structural editing — cuts, merges, and reorganization |
+| [`wtk-shard-doc`](#wtk-shard-doc) | Task | Split large markdown files into organized sections |
+| [`wtk-index-docs`](#wtk-index-docs) | Task | Generate or update an index of all docs in a folder |
 
-## bmad-help
+## wtk-help
 
 **Your intelligent guide to what comes next.** — Inspects your project state, detects what's been done, and recommends the next required or optional step.
 
 **Use it when:**
 
 - You finished a workflow and want to know what's next
-- You're new to BMad and need orientation
+- You're new to Wtk and need orientation
 - You're stuck and want context-aware advice
 - You installed new modules and want to see what's available
 
@@ -45,11 +45,11 @@ Run any core tool by typing its skill name (e.g., `bmad-help`) in your IDE. No a
 3. Recommends next steps in priority order — required steps first, then optional
 4. Presents each recommendation with the skill command and a brief description
 
-**Input:** Optional query in natural language (e.g., `bmad-help I have a SaaS idea, where do I start?`)
+**Input:** Optional query in natural language (e.g., `wtk-help I have a SaaS idea, where do I start?`)
 
 **Output:** Prioritized list of recommended next steps with skill commands
 
-## bmad-brainstorming
+## wtk-brainstorming
 
 **Generate diverse ideas through interactive creative techniques.** — A facilitated brainstorming session that loads proven ideation methods from a technique library and guides you toward 100+ ideas before organizing.
 
@@ -75,9 +75,9 @@ Run any core tool by typing its skill name (e.g., `bmad-help`) in your IDE. No a
 The magic happens in ideas 50–100. The workflow encourages generating 100+ ideas before organization.
 :::
 
-## bmad-party-mode
+## wtk-party-mode
 
-**Orchestrate multi-agent group discussions.** — Loads all installed BMad agents and facilitates a natural conversation where each agent contributes from their unique expertise and personality.
+**Orchestrate multi-agent group discussions.** — Loads all installed Wtk agents and facilitates a natural conversation where each agent contributes from their unique expertise and personality.
 
 **Use it when:**
 
@@ -97,7 +97,7 @@ The magic happens in ideas 50–100. The workflow encourages generating 100+ ide
 
 **Output:** Real-time multi-agent conversation with maintained agent personalities
 
-## bmad-distillator
+## wtk-distillator
 
 **Lossless LLM-optimized compression of source documents.** — Produces dense, token-efficient distillates that preserve all information for downstream LLM consumption. Verifiable through round-trip reconstruction.
 
@@ -124,7 +124,7 @@ The magic happens in ideas 50–100. The workflow encourages generating 100+ ide
 
 **Output:** Distillate markdown file(s) with compression ratio report (e.g., "3.2:1")
 
-## bmad-advanced-elicitation
+## wtk-advanced-elicitation
 
 **Push LLM output through iterative refinement methods.** — Selects from a library of elicitation techniques to systematically improve content through multiple passes.
 
@@ -146,7 +146,7 @@ The magic happens in ideas 50–100. The workflow encourages generating 100+ ide
 
 **Output:** Enhanced version of the content with improvements applied
 
-## bmad-review-adversarial-general
+## wtk-review-adversarial-general
 
 **Cynical review that assumes problems exist and searches for them.** — Takes a skeptical, jaded reviewer perspective with zero patience for sloppy work. Looks for what's missing, not just what's wrong.
 
@@ -170,7 +170,7 @@ The magic happens in ideas 50–100. The workflow encourages generating 100+ ide
 
 **Output:** Markdown list of 10+ findings with descriptions
 
-## bmad-review-edge-case-hunter
+## wtk-review-edge-case-hunter
 
 **Walk every branching path and boundary condition, report only unhandled cases.** — Pure path-tracing methodology that mechanically derives edge classes. Orthogonal to adversarial review — method-driven, not attitude-driven.
 
@@ -195,10 +195,10 @@ The magic happens in ideas 50–100. The workflow encourages generating 100+ ide
 **Output:** JSON array of findings, each with `location`, `trigger_condition`, `guard_snippet`, and `potential_consequence`
 
 :::note[Complementary Reviews]
-Run both `bmad-review-adversarial-general` and `bmad-review-edge-case-hunter` together for orthogonal coverage. The adversarial review catches quality and completeness issues; the edge case hunter catches unhandled paths.
+Run both `wtk-review-adversarial-general` and `wtk-review-edge-case-hunter` together for orthogonal coverage. The adversarial review catches quality and completeness issues; the edge case hunter catches unhandled paths.
 :::
 
-## bmad-editorial-review-prose
+## wtk-editorial-review-prose
 
 **Clinical copy-editing focused on communication clarity.** — Reviews text for issues that impede comprehension. Applies Microsoft Writing Style Guide baseline. Preserves author voice.
 
@@ -223,7 +223,7 @@ Run both `bmad-review-adversarial-general` and `bmad-review-edge-case-hunter` to
 
 **Output:** Three-column markdown table: Original Text | Revised Text | Changes
 
-## bmad-editorial-review-structure
+## wtk-editorial-review-structure
 
 **Structural editing — proposes cuts, merges, moves, and condensing.** — Reviews document organization and proposes substantive changes to improve clarity and flow before copy editing.
 
@@ -250,7 +250,7 @@ Run both `bmad-review-adversarial-general` and `bmad-review-edge-case-hunter` to
 
 **Output:** Document summary, prioritized recommendation list, and estimated reduction
 
-## bmad-shard-doc
+## wtk-shard-doc
 
 **Split large markdown files into organized section files.** — Uses level-2 headers as split points to create a folder of self-contained section files with an index.
 
@@ -271,7 +271,7 @@ Run both `bmad-review-adversarial-general` and `bmad-review-edge-case-hunter` to
 
 **Output:** Folder with `index.md` and `01-{section}.md`, `02-{section}.md`, etc.
 
-## bmad-index-docs
+## wtk-index-docs
 
 **Generate or update an index of all documents in a folder.** — Scans a directory, reads each file to understand its purpose, and produces an organized `index.md` with links and descriptions.
 

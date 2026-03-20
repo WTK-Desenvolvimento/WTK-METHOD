@@ -105,8 +105,8 @@ function extractAnchors(content) {
 
 /**
  * Resolve a site-relative link to a file path
- * /docs/how-to/installation/install-bmad.md -> docs/how-to/installation/install-bmad.md
- * /how-to/installation/install-bmad/ -> docs/how-to/installation/install-bmad.md or .../index.md
+ * /docs/how-to/installation/install-wtk.md -> docs/how-to/installation/install-wtk.md
+ * /how-to/installation/install-wtk/ -> docs/how-to/installation/install-wtk.md or .../index.md
  */
 function resolveLink(siteRelativePath, sourceFile) {
   // Strip anchor and query

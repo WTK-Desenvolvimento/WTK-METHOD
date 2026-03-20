@@ -1,7 +1,7 @@
 ---
 # File references (ONLY variables used in this step)
 prdFile: '{prd_file_path}'
-prdPurpose: '{project-root}/_bmad/bmm-skills/2-plan-workflows/create-prd/data/prd-purpose.md'
+prdPurpose: '{project-root}/_wtk/bmm-skills/2-plan-workflows/create-prd/data/prd-purpose.md'
 ---
 
 # Step E-3: Edit & Update
@@ -79,12 +79,12 @@ Display: "**Starting PRD Edits**
 - Section to edit: {section_name}
 - Current content: {existing content}
 - Changes needed: {specific changes from plan}
-- BMAD PRD standards: Load from prd-purpose.md
+- WTK PRD standards: Load from prd-purpose.md
 
 **Tasks:**
 1. Read current PRD section
 2. Apply specified changes
-3. Ensure BMAD PRD principles compliance:
+3. Ensure WTK PRD principles compliance:
    - High information density (no filler)
    - Measurable requirements
    - Clear structure
@@ -109,7 +109,7 @@ Apply changes and return updated section."
 - Additions: Create new sections with proper content
 - Updates: Modify existing content per plan
 - Removals: Remove specified content
-- Restructuring: Reformat content to BMAD standard
+- Restructuring: Reformat content to WTK standard
 
 **c) Update PRD file**
 - Apply changes to PRD
@@ -126,12 +126,12 @@ Changes: {brief summary}
 **If conversion mode is "Full restructuring" or "Both":**
 
 **For restructuring:**
-- Reorganize PRD to BMAD standard structure
+- Reorganize PRD to WTK standard structure
 - Ensure proper ## Level 2 headers
 - Reorder sections logically
-- Update PRD frontmatter to match BMAD format
+- Update PRD frontmatter to match WTK format
 
-**Follow BMAD PRD structure:**
+**Follow WTK PRD structure:**
 1. Executive Summary
 2. Success Criteria
 3. Product Scope
@@ -143,7 +143,7 @@ Changes: {brief summary}
 9. Non-Functional Requirements
 
 Display: "**PRD Restructured**
-BMAD standard structure applied.
+WTK standard structure applied.
 {Sections added/reordered}"
 
 ### 5. Update PRD Frontmatter

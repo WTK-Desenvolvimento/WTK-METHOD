@@ -38,7 +38,8 @@ class CustomHandler {
             entry.name === 'dist' ||
             entry.name === 'build' ||
             entry.name === '.git' ||
-            entry.name === 'bmad'
+            entry.name === 'bmad' ||
+            entry.name === '_wtk'
           ) {
             continue;
           }
@@ -119,12 +120,12 @@ class CustomHandler {
   /**
    * Install custom content
    * @param {string} customPath - Path to custom content directory
-   * @param {string} bmadDir - Target bmad directory
+   * @param {string} wtkDir - Target bmad directory
    * @param {Object} config - Configuration from custom.yaml
    * @param {Function} fileTrackingCallback - Optional callback to track installed files
    * @returns {Object} Installation result
    */
-  async install(customPath, bmadDir, config, fileTrackingCallback = null) {
+  async install(customPath, wtkDir, config, fileTrackingCallback = null) {
     const results = {
       agentsInstalled: 0,
       workflowsInstalled: 0,
@@ -135,7 +136,7 @@ class CustomHandler {
 
     try {
       // Create custom directories in bmad
-      const bmadCustomDir = path.join(bmadDir, 'custom');
+      const bmadCustomDir = path.join(wtkDir, 'custom');
       const bmadAgentsDir = path.join(bmadCustomDir, 'agents');
       const bmadWorkflowsDir = path.join(bmadCustomDir, 'workflows');
 
@@ -146,7 +147,7 @@ class CustomHandler {
       // Process agents - compile and copy agents
       const agentsDir = path.join(customPath, 'agents');
       if (await fs.pathExists(agentsDir)) {
-        await this.compileAndCopyAgents(agentsDir, bmadAgentsDir, bmadDir, config, fileTrackingCallback, results);
+        await this.compileAndCopyAgents(agentsDir, bmadAgentsDir, wtkDir, config, fileTrackingCallback, results);
 
         // Count agent files
         const agentFiles = await this.findFilesRecursively(agentsDir, ['.agent.yaml', '.md']);
@@ -286,12 +287,12 @@ class CustomHandler {
    * Compile .agent.yaml files to .md format and handle sidecars
    * @param {string} sourceAgentsPath - Source agents directory
    * @param {string} targetAgentsPath - Target agents directory
-   * @param {string} bmadDir - BMAD installation directory
+   * @param {string} wtkDir - WTK installation directory
    * @param {Object} config - Configuration for placeholder replacement
    * @param {Function} fileTrackingCallback - Optional callback to track installed files
    * @param {Object} results - Results object to update
    */
-  async compileAndCopyAgents(sourceAgentsPath, targetAgentsPath, bmadDir, config, fileTrackingCallback, results) {
+  async compileAndCopyAgents(sourceAgentsPath, targetAgentsPath, wtkDir, config, fileTrackingCallback, results) {
     // Get all .agent.yaml files recursively
     const agentFiles = await this.findFilesRecursively(sourceAgentsPath, ['.agent.yaml']);
 
@@ -303,9 +304,9 @@ class CustomHandler {
 
       const agentName = path.basename(agentFile, '.agent.yaml');
       const targetMdPath = path.join(targetDir, `${agentName}.md`);
-      // Use the actual bmadDir if available (for when installing to temp dir)
-      const actualBmadDir = config._bmadDir || bmadDir;
-      const customizePath = path.join(actualBmadDir, '_config', 'agents', `custom-${agentName}.customize.yaml`);
+      // Use the actual wtkDir if available (for when installing to temp dir)
+      const actualWtkDir = config._wtkDir || wtkDir;
+      const customizePath = path.join(actualWtkDir, '_config', 'agents', `custom-${agentName}.customize.yaml`);
 
       // Read and compile the YAML
       try {
@@ -320,7 +321,7 @@ class CustomHandler {
             let templateContent = await fs.readFile(genericTemplatePath, 'utf8');
             await fs.writeFile(customizePath, templateContent, 'utf8');
             // Only show customize creation in verbose mode
-            if (process.env.BMAD_VERBOSE_INSTALL === 'true') {
+            if (process.env.WTK_VERBOSE_INSTALL === 'true') {
               await prompts.log.message('  Created customize: custom-' + agentName + '.customize.yaml');
             }
           }
@@ -344,7 +345,7 @@ class CustomHandler {
         }
 
         // Only show compilation details in verbose mode
-        if (process.env.BMAD_VERBOSE_INSTALL === 'true') {
+        if (process.env.WTK_VERBOSE_INSTALL === 'true') {
           await prompts.log.message('    Compiled agent: ' + agentName + ' -> ' + path.relative(targetAgentsPath, targetMdPath));
         }
       } catch (error) {

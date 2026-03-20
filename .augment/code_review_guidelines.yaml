@@ -1,4 +1,4 @@
-# Augment Code Review Guidelines for BMAD-METHOD
+# Augment Code Review Guidelines for WTK-METHOD
 # https://docs.augmentcode.com/codereview/overview
 # Focus: Skill validation and quality
 # Canonical rules: tools/skill-validator.md (single source of truth)
@@ -28,7 +28,7 @@ file_paths_to_ignore:
   - "test/template-test-generator/**"
   - "tools/template-test-generator/test-scenarios/**"
   # --- Shared baseline: non-project dirs ---
-  - "_bmad*/**"
+  - "_wtk*/**"
   - "website/**"
   - "z*/**"
   - "sample-project/**"

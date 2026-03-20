@@ -170,7 +170,7 @@ class YamlXmlBuilder {
 
     if (buildMetadata.forWebBundle) {
       // Web bundle: keep existing format
-      xml += '<!-- Powered by BMAD-CORE™ -->\n\n';
+      xml += '<!-- Powered by WTK-CORE™ -->\n\n';
       xml += `# ${metadata.title || 'Agent'}\n\n`;
     } else {
       // Installation: use YAML frontmatter + instruction
@@ -182,7 +182,7 @@ class YamlXmlBuilder {
 
       xml += '---\n';
       xml += `name: "${nameFromFile}"\n`;
-      xml += `description: "${metadata.title || 'BMAD Agent'}"\n`;
+      xml += `description: "${metadata.title || 'WTK Agent'}"\n`;
       xml += '---\n\n';
       xml +=
         "You must fully embody this agent's persona and follow all activation instructions exactly as specified. NEVER break character until given an exit command.\n\n";

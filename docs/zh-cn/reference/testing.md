@@ -5,14 +5,14 @@ sidebar:
   order: 5
 ---
 
-BMad 提供两条测试路径：用于快速生成测试的内置 QA 智能体，以及用于企业级测试策略的可安装测试架构师模块。
+Wtk 提供两条测试路径：用于快速生成测试的内置 QA 智能体，以及用于企业级测试策略的可安装测试架构师模块。
 
 ## 应该使用哪一个？
 
 | 因素 | Quinn（内置 QA） | TEA 模块 |
 | --- | --- | --- |
 | **最适合** | 中小型项目、快速覆盖 | 大型项目、受监管或复杂领域 |
-| **设置** | 无需安装——包含在 BMM 中 | 通过 `npx bmad-method install` 单独安装 |
+| **设置** | 无需安装——包含在 BMM 中 | 通过 `npx wtk-method install` 单独安装 |
 | **方法** | 快速生成测试，稍后迭代 | 先规划，再生成并保持可追溯性 |
 | **测试类型** | API 和 E2E 测试 | API、E2E、ATDD、NFR 等 |
 | **策略** | 快乐路径 + 关键边界情况 | 基于风险的优先级排序（P0-P3） |
@@ -26,7 +26,7 @@ BMad 提供两条测试路径：用于快速生成测试的内置 QA 智能体�
 
 Quinn 是 BMM（敏捷套件）模块中的内置 QA 智能体。它使用项目现有的测试框架快速生成可运行的测试——无需配置或额外安装。
 
-**触发方式：** `QA` 或 `bmad-bmm-qa-automate`
+**触发方式：** `QA` 或 `wtk-bmm-qa-automate`
 
 ### Quinn 的功能
 
@@ -65,9 +65,9 @@ Quinn 仅生成测试。如需代码审查和故事验证，请改用代码审�
 
 TEA 是一个独立模块，提供专家智能体（Murat）和九个结构化工作流，用于企业级测试。它超越了测试生成，涵盖测试策略、基于风险的规划、质量门控和需求可追溯性。
 
-- **文档：** [TEA 模块文档（英文）](https://bmad-code-org.github.io/bmad-method-test-architecture-enterprise/)
-- **安装：** `npx bmad-method install` 并选择 TEA 模块
-- **npm：** [`bmad-method-test-architecture-enterprise`](https://www.npmjs.com/package/bmad-method-test-architecture-enterprise)
+- **文档：** [TEA 模块文档（英文）](https://wtk-code-org.github.io/wtk-method-test-architecture-enterprise/)
+- **安装：** `npx wtk-method install` 并选择 TEA 模块
+- **npm：** [`wtk-method-test-architecture-enterprise`](https://www.npmjs.com/package/wtk-method-test-architecture-enterprise)
 
 ### TEA 提供的功能
 
@@ -95,7 +95,7 @@ TEA 还支持 P0-P3 基于风险的优先级排序，以及与 Playwright Utils 
 
 ## 测试如何融入工作流
 
-Quinn 的 Automate 工作流出现在 BMad 方法工作流图的第 4 阶段（实现）。典型序列：
+Quinn 的 Automate 工作流出现在 Wtk 方法工作流图的第 4 阶段（实现）。典型序列：
 
 1. 使用开发工作流（`DS`）实现一个故事
 2. 使用 Quinn（`QA`）或 TEA 的 Automate 工作流生成测试

@@ -1,9 +1,9 @@
 ---
-name: bmad-help
-description: 'Analyzes current state and user query to answer BMad questions or recommend the next workflow or agent. Use when user says what should I do next, what do I do now, or asks a question about BMad'
+name: wtk-help
+description: 'Analyzes current state and user query to answer Wtk questions or recommend the next workflow or agent. Use when user says what should I do next, what do I do now, or asks a question about Wtk'
 ---
 
-# Task: BMAD Help
+# Task: WTK Help
 
 ## ROUTING RULES
 
@@ -19,17 +19,17 @@ description: 'Analyzes current state and user query to answer BMad questions or 
 
 ### Command-Based Workflows
 When `command` field has a value:
-- Show the command as a skill name in backticks (e.g., `bmad-bmm-create-prd`)
+- Show the command as a skill name in backticks (e.g., `wtk-bmm-create-prd`)
 
 ### Skill-Referenced Workflows
 When `workflow-file` starts with `skill:`:
-- The value is a skill reference (e.g., `skill:bmad-quick-dev`), NOT a file path
+- The value is a skill reference (e.g., `skill:wtk-quick-dev`), NOT a file path
 - Do NOT attempt to resolve or load it as a file path
 - Display using the `command` column value as a skill name in backticks (same as command-based workflows)
 
 ### Agent-Based Workflows
 When `command` field is empty:
-- User loads agent first by invoking the agent skill (e.g., `bmad-pm`)
+- User loads agent first by invoking the agent skill (e.g., `wtk-pm`)
 - Then invokes by referencing the `code` field or describing the `name` field
 - Do NOT show a slash command — show the code value and agent load instruction instead
 
@@ -59,9 +59,9 @@ Determine what was just completed:
 
 ## EXECUTION
 
-1. **Load catalog** — Load `{project-root}/_bmad/_config/bmad-help.csv`
+1. **Load catalog** — Load `{project-root}/_wtk/_config/wtk-help.csv`
 
-2. **Resolve output locations and config** — Scan each folder under `{project-root}/_bmad/` (except `_config`) for `config.yaml`. For each workflow row, resolve its `output-location` variables against that module's config so artifact paths can be searched. Also extract `communication_language` and `project_knowledge` from each scanned module's config.
+2. **Resolve output locations and config** — Scan each folder under `{project-root}/_wtk/` (except `_config`) for `config.yaml`. For each workflow row, resolve its `output-location` variables against that module's config so artifact paths can be searched. Also extract `communication_language` and `project_knowledge` from each scanned module's config.
 
 3. **Ground in project knowledge** — If `project_knowledge` resolves to an existing path, read available documentation files (architecture docs, project overview, tech stack references) for grounding context. Use discovered project facts when composing any project-specific output. Never fabricate project-specific details — if documentation is unavailable, state so.
 

@@ -5,7 +5,7 @@ sidebar:
   order: 5
 ---
 
-使用 **Quick Dev** 进行 bug 修复、重构或小型针对性更改，这些操作不需要完整的 BMad Method。
+使用 **Quick Dev** 进行 bug 修复、重构或小型针对性更改，这些操作不需要完整的 Wtk Method。
 
 ## 何时使用此方法
 
@@ -15,7 +15,7 @@ sidebar:
 - 依赖更新
 
 :::note[前置条件]
-- 已安装 BMad Method（`npx bmad-method install`）
+- 已安装 Wtk Method（`npx wtk-method install`）
 - AI 驱动的 IDE（Claude Code、Cursor 或类似工具）
 :::
 
@@ -38,7 +38,7 @@ run quick-dev — fix https://github.com/org/repo/issues/42
 ```
 
 ```text
-run quick-dev — 实现 _bmad-output/implementation-artifacts/my-intent.md 中的意图
+run quick-dev — 实现 _wtk-output/implementation-artifacts/my-intent.md 中的意图
 ```
 
 ```text
@@ -86,18 +86,18 @@ Quick Dev 保持每次运行聚焦于单一目标。如果你的请求包含多�
 
 ## 何时升级到正式规划
 
-在以下情况下考虑使用完整的 BMad Method：
+在以下情况下考虑使用完整的 Wtk Method：
 
 - 更改影响多个系统或需要在许多文件中进行协调更新
 - 你不确定范围，需要先进行需求发现
 - 你需要为团队记录文档或架构决策
 
-参见 [Quick Dev](../explanation/quick-dev.md) 了解 Quick Dev 如何融入 BMad Method。
+参见 [Quick Dev](../explanation/quick-dev.md) 了解 Quick Dev 如何融入 Wtk Method。
 
 ---
 ## 术语说明
 
-- **Quick Dev**：快速开发。BMad Method 中的快速工作流，用于小型更改的完整实现周期。
+- **Quick Dev**：快速开发。Wtk Method 中的快速工作流，用于小型更改的完整实现周期。
 - **refactoring**：重构。在不改变代码外部行为的情况下改进其内部结构的过程。
 - **breaking changes**：破坏性更改。可能导致现有代码或功能不再正常工作的更改。
 - **test suite**：测试套件。一组用于验证软件功能的测试用例集合。

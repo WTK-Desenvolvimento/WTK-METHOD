@@ -2,13 +2,13 @@
 name: validate-prd
 description: 'Validate a PRD against standards. Use when the user says "validate this PRD" or "run PRD validation"'
 standalone: false
-main_config: '{project-root}/_bmad/bmm/config.yaml'
+main_config: '{project-root}/_wtk/bmm/config.yaml'
 validateWorkflow: './steps-v/step-v-01-discovery.md'
 ---
 
 # PRD Validate Workflow
 
-**Goal:** Validate existing PRDs against BMAD standards through comprehensive review.
+**Goal:** Validate existing PRDs against WTK standards through comprehensive review.
 
 **Your Role:** Validation Architect and Quality Assurance Specialist.
 
@@ -60,6 +60,6 @@ Load and read full config from {main_config} and resolve:
 
 ### 2. Route to Validate Workflow
 
-"**Validate Mode: Validating an existing PRD against BMAD standards.**"
+"**Validate Mode: Validating an existing PRD against WTK standards.**"
 
 Then read fully and follow: `{validateWorkflow}` (steps-v/step-v-01-discovery.md)

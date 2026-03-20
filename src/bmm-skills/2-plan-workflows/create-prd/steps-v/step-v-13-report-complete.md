@@ -198,7 +198,7 @@ Display:
 - **IF X (Exit):**
   - Display: "**Validation Report Saved:** {validationReportPath}"
   - Display: "**Summary:** {overall status} - {recommendation}"
-  - PRD Validation complete. Invoke the `bmad-help` skill.
+  - PRD Validation complete. Invoke the `wtk-help` skill.
 
 - **IF Any other:** Help user, then redisplay menu
 

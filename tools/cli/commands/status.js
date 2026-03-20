@@ -10,29 +10,29 @@ const ui = new UI();
 
 module.exports = {
   command: 'status',
-  description: 'Display BMAD installation status and module versions',
+  description: 'Display WTK installation status and module versions',
   options: [],
   action: async (options) => {
     try {
       // Find the bmad directory
       const projectDir = process.cwd();
-      const { bmadDir } = await installer.findBmadDir(projectDir);
+      const { wtkDir } = await installer.findWtkDir(projectDir);
 
       // Check if bmad directory exists
       const fs = require('fs-extra');
-      if (!(await fs.pathExists(bmadDir))) {
-        await prompts.log.warn('No BMAD installation found in the current directory.');
-        await prompts.log.message(`Expected location: ${bmadDir}`);
+      if (!(await fs.pathExists(wtkDir))) {
+        await prompts.log.warn('No WTK installation found in the current directory.');
+        await prompts.log.message(`Expected location: ${wtkDir}`);
         await prompts.log.message('Run "bmad install" to set up a new installation.');
         process.exit(0);
         return;
       }
 
       // Read manifest
-      const manifestData = await manifest._readRaw(bmadDir);
+      const manifestData = await manifest._readRaw(wtkDir);
 
       if (!manifestData) {
-        await prompts.log.warn('No BMAD installation manifest found.');
+        await prompts.log.warn('No WTK installation manifest found.');
         await prompts.log.message('Run "bmad install" to set up a new installation.');
         process.exit(0);
         return;
@@ -43,20 +43,20 @@ module.exports = {
       const modules = manifestData.modules || [];
 
       // Check for available updates (only for external modules)
-      const availableUpdates = await manifest.checkForUpdates(bmadDir);
+      const availableUpdates = await manifest.checkForUpdates(wtkDir);
 
       // Display status
       await ui.displayStatus({
         installation,
         modules,
         availableUpdates,
-        bmadDir,
+        wtkDir,
       });
 
       process.exit(0);
     } catch (error) {
       await prompts.log.error(`Status check failed: ${error.message}`);
-      if (process.env.BMAD_DEBUG) {
+      if (process.env.WTK_DEBUG) {
         await prompts.log.message(error.stack);
       }
       process.exit(1);

@@ -26,12 +26,12 @@ const AgentPartyGenerator = {
     }
 
     // Build XML content
-    let xmlContent = `<!-- Powered by BMAD-CORE™ -->
-<!-- Agent Manifest - Generated during BMAD ${forWeb ? 'bundling' : 'installation'} -->
+    let xmlContent = `<!-- Powered by WTK-CORE™ -->
+<!-- Agent Manifest - Generated during WTK ${forWeb ? 'bundling' : 'installation'} -->
 <!-- This file contains a summary of all ${forWeb ? 'bundled' : 'installed'} agents for quick reference -->
-<manifest id="bmad/_config/agent-manifest.csv" version="1.0" generated="${new Date().toISOString()}">
+<manifest id="_wtk/_config/agent-manifest.csv" version="1.0" generated="${new Date().toISOString()}">
   <description>
-    Complete roster of ${forWeb ? 'bundled' : 'installed'} BMAD agents with summarized personas for efficient multi-agent orchestration.
+    Complete roster of ${forWeb ? 'bundled' : 'installed'} WTK agents with summarized personas for efficient multi-agent orchestration.
     Used by party-mode and other multi-agent coordination features.
   </description>
 `;
