@@ -22,6 +22,16 @@ Load `{project-root}/_wtk/core/config.yaml` and resolve:
 - `user_name`, `communication_language`, `document_output_language`, `output_folder`
 - `date` = current UTC date (YYYY-MM-DD) for filenames and headers
 
+### Linear artifact destination (optional)
+
+1. Run `wtk_init.py` from `wtk-init` with `load --module linear --all --project-root {project-root}`.
+2. If the command fails or stderr contains `init_required`, treat **`artifact_output_destination` as `file`** (Linear module not installed or not configured).
+3. Otherwise read from the JSON:
+   - `artifact_output_destination` — `file` | `linear` | `both`
+   - `linear_team_key`, `linear_default_project`, `linear_default_labels` (apply when using Linear MCP)
+
+See `{project-root}/_wtk/linear/README.md` (after install) or the framework doc `docs/reference/linear-module.md` for the full contract.
+
 ### Paths
 
 - `n8n_dir` = `{output_folder}/n8n` (ensure logical default for outputs)
@@ -47,10 +57,17 @@ Load `{project-root}/_wtk/core/config.yaml` and resolve:
 3. **Credentials:** types and purposes only — never placeholder secret values.
 4. Align recommendations with **self-hosted** assumptions from the environment spec when available.
 
-### Step 3 — Write the document
+### Step 3 — Persist the story
 
-1. Write the completed story to `story_file` (create `workflow-stories` under `n8n_dir` as needed).
-2. Tell the user the exact path.
+Let `destination` = `artifact_output_destination` from the Linear section (`file` if that section was skipped).
+
+1. **If `destination` is `file` or `both`:** write the completed story to `story_file` (create `workflow-stories` under `n8n_dir` as needed). Tell the user the exact path.
+2. **If `destination` is `linear` or `both`:** use the **Linear MCP** tools available in the IDE (user must enable the Linear MCP server and sign in). Create a new issue or update an existing one if the user provided an issue URL or identifier:
+   - **Title:** workflow title (or derive from `story_slug`).
+   - **Description:** the full markdown story (same content as the file when `both`).
+   - Apply `linear_team_key`, `linear_default_project`, and `linear_default_labels` when the MCP tools support them; if a field is empty, omit or choose interactively with the user.
+3. **Credentials:** never put secret values in Linear — keep credential **types** only, as elsewhere in this skill.
+4. If Linear MCP is unavailable but `destination` is `linear` or `both`, say so clearly; if `both` or `file`, still write `story_file` when applicable.
 
 ### Step 4 — Cross-skill suggestions
 
@@ -63,7 +80,7 @@ Recommend follow-ups as needed:
 
 ### Step 5 — Optional tightening
 
-If the user asks, run a **short review pass**: ambiguous ACs, missing error path, missing idempotency, or untestable acceptance criteria — still chat-only edits to the markdown file.
+If the user asks, run a **short review pass**: ambiguous ACs, missing error path, missing idempotency, or untestable acceptance criteria — apply edits in chat, then update the **file** (if used) and/or **Linear issue** (if used) to match.
 
 ---
 

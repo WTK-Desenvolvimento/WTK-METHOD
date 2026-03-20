@@ -156,6 +156,11 @@ When running any workflow:
       if (match) {
         transformed = `{project-root}/${this.wtkFolderName}/n8n/${match[1]}`;
       }
+    } else if (workflowPath.includes('/src/linear-skills/')) {
+      const match = workflowPath.match(/\/src\/linear-skills\/(.+)/);
+      if (match) {
+        transformed = `{project-root}/${this.wtkFolderName}/linear/${match[1]}`;
+      }
     } else if (workflowPath.includes('/src/core-skills/')) {
       const match = workflowPath.match(/\/src\/core-skills\/(.+)/);
       if (match) {

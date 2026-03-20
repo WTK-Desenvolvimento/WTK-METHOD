@@ -17,6 +17,8 @@ const AgentPartyGenerator = {
       bmm: [],
       cis: [],
       core: [],
+      linear: [],
+      n8n: [],
       custom: [],
     };
 
@@ -45,11 +47,13 @@ const AgentPartyGenerator = {
           ? 'BMM Module'
           : module === 'n8n'
             ? 'n8n Module'
-            : module === 'cis'
-              ? 'CIS Module'
-              : module === 'core'
-                ? 'Core Module'
-                : 'Custom Module';
+            : module === 'linear'
+              ? 'Linear Module'
+              : module === 'cis'
+                ? 'CIS Module'
+                : module === 'core'
+                  ? 'Core Module'
+                  : 'Custom Module';
 
       xmlContent += `\n  <!-- ${moduleTitle} Agents -->\n`;
 

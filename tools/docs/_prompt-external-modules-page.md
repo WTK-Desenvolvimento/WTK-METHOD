@@ -49,7 +49,7 @@ title: Official Modules
   - Brief bullet list of what it provides (agents, workflows, key features) — keep to 3-5 bullets
 - Include a `:::tip` admonition about how to install modules (via `npx wtk-method` installer)
 - Mention that community modules and a marketplace are coming
-- Do NOT include built-in modules (core, bmm) — this page is specifically for external/add-on modules
+- Do NOT include built-in modules (core, bmm, n8n, linear) — this page is specifically for external/add-on modules
 
 ## Existing Pages for Reference
 

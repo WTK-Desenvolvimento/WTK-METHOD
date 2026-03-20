@@ -187,7 +187,7 @@ class ModuleManager {
 
   /**
    * List all available modules (excluding core which is always installed)
-   * Built-in optional modules: bmm (src/bmm-skills), n8n (src/n8n-skills)
+   * Built-in optional modules: bmm (src/bmm-skills), n8n (src/n8n-skills), linear (src/linear-skills)
    * All other modules come from external-official-modules.yaml
    * @returns {Object} Object with modules array and customModules array
    */
@@ -210,6 +210,14 @@ class ModuleManager {
       const n8nInfo = await this.getModuleInfo(n8nPath, 'n8n', 'src/n8n-skills');
       if (n8nInfo) {
         modules.push(n8nInfo);
+      }
+    }
+
+    const linearPath = getSourcePath('linear-skills');
+    if (await fs.pathExists(linearPath)) {
+      const linearInfo = await this.getModuleInfo(linearPath, 'linear', 'src/linear-skills');
+      if (linearInfo) {
+        modules.push(linearInfo);
       }
     }
 
@@ -263,6 +271,7 @@ class ModuleManager {
     const isCustomSource =
       sourceDescription !== 'src/bmm-skills' &&
       sourceDescription !== 'src/n8n-skills' &&
+      sourceDescription !== 'src/linear-skills' &&
       sourceDescription !== 'src/core-skills' &&
       sourceDescription !== 'src/modules';
     const moduleInfo = {
@@ -326,6 +335,13 @@ class ModuleManager {
       const n8nPath = getSourcePath('n8n-skills');
       if (await fs.pathExists(n8nPath)) {
         return n8nPath;
+      }
+    }
+
+    if (moduleCode === 'linear') {
+      const linearPath = getSourcePath('linear-skills');
+      if (await fs.pathExists(linearPath)) {
+        return linearPath;
       }
     }
 

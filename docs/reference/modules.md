@@ -32,6 +32,17 @@ Skills for **self-hosted n8n** ship inside the WTK Method repository but are **n
 
 Outputs use paths from **core** config (e.g. `{output_folder}/n8n/...`). Core must remain installed.
 
+## Optional built-in: Linear (issue-backed artifacts)
+
+Optional module to send **supported skill outputs** to **Linear** (via MCP in the IDE), keep writing files only, or **both**. Separate from n8n — enable it when your team tracks specs and stories in Linear.
+
+- **Code:** `linear`
+- **Default:** off (`default_selected: false`)
+- **Source:** built-in with the framework
+- **Config:** `_wtk/linear/config.yaml` (includes `artifact_output_destination` and Linear routing hints)
+
+See [Linear module (artifact destinations)](./linear-module.md) for setup, MCP auth, and the contract for skill authors.
+
 ## Wtk Builder
 
 Create custom agents, workflows, and domain-specific modules with guided assistance. Wtk Builder is the meta-module for extending the framework itself.

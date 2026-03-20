@@ -84,6 +84,12 @@ The `--answers` JSON format:
   "bmb": {
     "bmad_builder_output_folder": "_wtk-output/skills",
     "bmad_builder_reports": "_wtk-output/reports"
+  },
+  "linear": {
+    "artifact_output_destination": "file",
+    "linear_team_key": "",
+    "linear_default_project": "",
+    "linear_default_labels": ""
   }
 }
 ```

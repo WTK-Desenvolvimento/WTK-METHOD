@@ -515,7 +515,7 @@ class YamlXmlBuilder {
         module = potentialModule;
       }
     } else if (srcIndex !== -1 && pathParts[srcIndex + 1]) {
-      // Path contains /src/{module}/ (bmm-skills, n8n-skills, and core-skills are directly under src/)
+      // Path contains /src/{module}/ (bmm-skills, n8n-skills, linear-skills, and core-skills are directly under src/)
       const potentialModule = pathParts[srcIndex + 1];
       switch (potentialModule) {
         case 'bmm-skills': {
@@ -524,6 +524,10 @@ class YamlXmlBuilder {
         }
         case 'n8n-skills': {
           module = 'n8n';
+          break;
+        }
+        case 'linear-skills': {
+          module = 'linear';
           break;
         }
         case 'core-skills': {

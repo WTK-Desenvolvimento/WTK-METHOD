@@ -1,0 +1,35 @@
+code: linear
+name: "WTK Linear (issue-backed artifacts)"
+description: >-
+  Optional module: route supported skill outputs to Linear (via MCP in the IDE), keep files only, or both.
+  Configure team/project/labels per project. Does not replace secrets — use your IDE's Linear MCP auth.
+default_selected: false
+# Merged into _wtk/linear/config.yaml with core keys (output_folder, languages, etc.)
+
+artifact_output_destination:
+  prompt: "Where should skills persist primary artifacts when the skill supports Linear (e.g. workflow stories)?"
+  default: "file"
+  result: "{value}"
+  single-select:
+    - value: file
+      label: "Files only — under output_folder (classic WTK)"
+    - value: linear
+      label: "Linear only — create or update issues via Linear MCP"
+    - value: both
+      label: "Both — write files and mirror the same content to Linear"
+
+linear_team_key:
+  prompt: >-
+    Linear team key from the workspace URL (e.g. acme in https://linear.app/acme/...). Leave empty if you will pick the team in MCP each time.
+  default: ""
+  result: "{value}"
+
+linear_default_project:
+  prompt: "Default Linear project name for new issues (optional; exact name as shown in Linear)."
+  default: ""
+  result: "{value}"
+
+linear_default_labels:
+  prompt: "Default labels for new issues, comma-separated (optional; must exist in Linear)."
+  default: ""
+  result: "{value}"

@@ -161,6 +161,14 @@ function mapInstalledToSource(refPath) {
     return path.join(SRC_DIR, cleaned);
   }
 
+  // Installed _wtk/n8n/ and _wtk/linear/ map to *-skills source dirs
+  if (cleaned.startsWith('n8n/')) {
+    return path.join(SRC_DIR, cleaned.replace(/^n8n\//, 'n8n-skills/'));
+  }
+  if (cleaned.startsWith('linear/')) {
+    return path.join(SRC_DIR, cleaned.replace(/^linear\//, 'linear-skills/'));
+  }
+
   // Fallback: map directly under src/
   return path.join(SRC_DIR, cleaned);
 }

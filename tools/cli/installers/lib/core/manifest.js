@@ -26,7 +26,8 @@ class Manifest {
     if (data.modules && Array.isArray(data.modules)) {
       for (const moduleName of data.modules) {
         // Core and BMM modules use the Wtk version
-        const moduleVersion = moduleName === 'core' || moduleName === 'bmm' || moduleName === 'n8n' ? wtkVersion : null;
+        const moduleVersion =
+          moduleName === 'core' || moduleName === 'bmm' || moduleName === 'n8n' || moduleName === 'linear' ? wtkVersion : null;
         const now = data.installDate || new Date().toISOString();
 
         moduleDetails.push({
@@ -34,7 +35,7 @@ class Manifest {
           version: moduleVersion,
           installDate: now,
           lastUpdated: now,
-          source: moduleName === 'core' || moduleName === 'bmm' || moduleName === 'n8n' ? 'built-in' : 'unknown',
+          source: moduleName === 'core' || moduleName === 'bmm' || moduleName === 'n8n' || moduleName === 'linear' ? 'built-in' : 'unknown',
         });
       }
     }
@@ -841,7 +842,7 @@ class Manifest {
     const yaml = require('yaml');
 
     // Built-in modules use Wtk version (core, bmm, and n8n ship in the WTK-METHOD repo)
-    if (['core', 'bmm', 'n8n'].includes(moduleName)) {
+    if (['core', 'bmm', 'n8n', 'linear'].includes(moduleName)) {
       const wtkVersion = require(path.join(getProjectRoot(), 'package.json')).version;
       return {
         version: wtkVersion,
