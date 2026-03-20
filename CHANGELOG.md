@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+* **n8n module is optional at install** — `wtk-n8n-*` skills moved from core to built-in module `n8n` (`src/n8n-skills`, `default_selected: false`). Select **WTK n8n (self-hosted)** in the installer when you want them.
+
 ## v6.2.0 - 2026-03-15
 
 ### 🎁 Highlights

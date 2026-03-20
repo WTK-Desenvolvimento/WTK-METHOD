@@ -515,12 +515,22 @@ class YamlXmlBuilder {
         module = potentialModule;
       }
     } else if (srcIndex !== -1 && pathParts[srcIndex + 1]) {
-      // Path contains /src/{module}/ (bmm-skills and core-skills are directly under src/)
+      // Path contains /src/{module}/ (bmm-skills, n8n-skills, and core-skills are directly under src/)
       const potentialModule = pathParts[srcIndex + 1];
-      if (potentialModule === 'bmm-skills') {
-        module = 'bmm';
-      } else if (potentialModule === 'core-skills') {
-        module = 'core';
+      switch (potentialModule) {
+        case 'bmm-skills': {
+          module = 'bmm';
+          break;
+        }
+        case 'n8n-skills': {
+          module = 'n8n';
+          break;
+        }
+        case 'core-skills': {
+          module = 'core';
+          break;
+        }
+        // No default
       }
     }
 

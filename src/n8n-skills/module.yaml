@@ -1,0 +1,4 @@
+code: n8n
+name: "WTK n8n (self-hosted)"
+description: "Optional skills for n8n — environment discovery (MCP), workflow design, integrations, operations, and dev-story specs. Uses core config paths (e.g. output_folder)."
+default_selected: false

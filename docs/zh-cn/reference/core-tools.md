@@ -26,12 +26,8 @@ sidebar:
 | [`wtk-editorial-review-structure`](#wtk-editorial-review-structure) | 任务 | 结构编辑——裁剪、合并与重组 |
 | [`wtk-shard-doc`](#wtk-shard-doc) | 任务 | 将大型 Markdown 文件拆分为有序章节 |
 | [`wtk-index-docs`](#wtk-index-docs) | 任务 | 生成或更新文件夹的文档索引 |
-| [`wtk-n8n-master`](#wtk-n8n-master) | 任务 | 通过 MCP 探测自建 n8n 并写入环境规格 |
-| [`wtk-n8n-studio`](#wtk-n8n-studio) | 任务 | 依据环境规格为 n8n 工作指路 |
-| [`wtk-n8n-workflows`](#wtk-n8n-workflows) | 任务 | 设计与调优 n8n 工作流图 |
-| [`wtk-n8n-integrations`](#wtk-n8n-integrations) | 任务 | 规划 HTTP、Webhook、OAuth 与凭据 |
-| [`wtk-n8n-operations`](#wtk-n8n-operations) | 任务 | 队列模式、Worker、日志、指标与托管 |
-| [`wtk-n8n-dev-story`](#wtk-n8n-dev-story) | 工作流 | 在编辑器搭建前先写工作流故事文档 |
+
+自建 **n8n** 相关技能（`wtk-n8n-*`）不属于核心模块，而在可选内置 **n8n** 模块中。安装时在 `npx wtk-method install` 里勾选 **WTK n8n (self-hosted)**，说明见[官方模块（英文）](../../reference/modules.md#optional-built-in-n8n-self-hosted)。
 
 ## wtk-help
 
@@ -297,43 +293,3 @@ sidebar:
 **输入：** 目标文件夹路径
 
 **输出：** `index.md`，包含有序的文件列表、相对链接和简要描述
-
-## wtk-n8n-master
-
-**记录 n8n 部署事实。** — 在可用时通过 n8n MCP 收集版本、扩展、执行模式与自建拓扑，写入单一 Markdown 规格文件。
-
-**适用场景：** 开始 n8n 自动化前需要权威环境文档；需要基于 MCP 的发现而非猜测。
-
-**输出：** `{output_folder}/n8n/n8n-environment-spec.md`
-
-## wtk-n8n-studio
-
-**n8n 会话入口。** — 读取环境规格并将你导向合适的专项 n8n 技能。
-
-**输出：** 对话指导；可选 `{output_folder}/n8n/session-notes-*.md`
-
-## wtk-n8n-workflows
-
-**自建 n8n 的工作流设计与性能。** — 数据流、错误、幂等、分批与队列相关模式。
-
-**输出：** 对话指导
-
-## wtk-n8n-integrations
-
-**外部连接与安全认证模式。** — HTTP、Webhook、OAuth2、凭据类型、限流；不暴露密钥。
-
-**输出：** 对话指导
-
-## wtk-n8n-operations
-
-**运行与观测自建 n8n。** — Docker/Kubernetes、队列模式与 Worker、日志、指标、升级、备份。
-
-**输出：** 对话指导
-
-## wtk-n8n-dev-story
-
-**在点选节点之前先写清工作流故事。** — 生成含触发器、数据契约、验收标准与手动测试计划的 Markdown。
-
-**适用场景：** 需要可交付的规格文档（技能名 `wtk-n8n-dev-story`；部分 IDE 可能显示为 `/wtk-n8n-dev-story`）。
-
-**输出：** `{output_folder}/n8n/workflow-stories/{slug}.md`

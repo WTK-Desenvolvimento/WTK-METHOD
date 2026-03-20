@@ -1715,7 +1715,7 @@ class Installer {
     try {
       const entries = await fs.readdir(wtkDir, { withFileTypes: true });
       for (const entry of entries) {
-        if (!entry.isDirectory() || entry.name === 'bmm' || entry.name.startsWith('_')) continue;
+        if (!entry.isDirectory() || entry.name === 'bmm' || entry.name === 'n8n' || entry.name.startsWith('_')) continue;
         const configPath = path.join(wtkDir, entry.name, 'config.yaml');
         if (await fs.pathExists(configPath)) {
           try {

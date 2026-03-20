@@ -82,11 +82,21 @@ class DependencyResolver {
       // Check if this is a source directory (has 'src' subdirectory)
       const srcDir = path.join(wtkDir, 'src');
       if (await fs.pathExists(srcDir)) {
-        // Source directory structure: src/core-skills or src/bmm-skills
-        if (module === 'core') {
-          moduleDir = path.join(srcDir, 'core-skills');
-        } else if (module === 'bmm') {
-          moduleDir = path.join(srcDir, 'bmm-skills');
+        // Source directory structure: src/core-skills, src/bmm-skills, or src/n8n-skills
+        switch (module) {
+          case 'core': {
+            moduleDir = path.join(srcDir, 'core-skills');
+            break;
+          }
+          case 'bmm': {
+            moduleDir = path.join(srcDir, 'bmm-skills');
+            break;
+          }
+          case 'n8n': {
+            moduleDir = path.join(srcDir, 'n8n-skills');
+            break;
+          }
+          // No default
         }
       }
 
@@ -418,8 +428,8 @@ class DependencyResolver {
           const module = parts[0];
           const rest = parts.slice(1).join('/');
           let modulePath;
-          if (module === 'bmm') {
-            // bmm is directly under src/
+          if (module === 'bmm' || module === 'n8n') {
+            // bmm and n8n are top-level under _wtk/ (not _wtk/modules/)
             modulePath = path.join(wtkDir, module, rest);
           } else {
             // Other modules are under modules/
@@ -494,11 +504,13 @@ class DependencyResolver {
     if (command.startsWith('@task-')) {
       const taskName = command.slice(6);
       // Search all modules for this task
-      for (const module of ['core', 'bmm', 'cis']) {
+      for (const module of ['core', 'bmm', 'n8n', 'cis']) {
         const taskPath =
           module === 'core'
             ? path.join(wtkDir, 'core', 'tasks', `${taskName}.md`)
-            : path.join(wtkDir, 'modules', module, 'tasks', `${taskName}.md`);
+            : module === 'bmm' || module === 'n8n'
+              ? path.join(wtkDir, module, 'tasks', `${taskName}.md`)
+              : path.join(wtkDir, 'modules', module, 'tasks', `${taskName}.md`);
         if (await fs.pathExists(taskPath)) {
           return taskPath;
         }
@@ -506,11 +518,13 @@ class DependencyResolver {
     } else if (command.startsWith('@agent-')) {
       const agentName = command.slice(7);
       // Search all modules for this agent
-      for (const module of ['core', 'bmm', 'cis']) {
+      for (const module of ['core', 'bmm', 'n8n', 'cis']) {
         const agentPath =
           module === 'core'
             ? path.join(wtkDir, 'core', 'agents', `${agentName}.md`)
-            : path.join(wtkDir, 'modules', module, 'agents', `${agentName}.md`);
+            : module === 'bmm' || module === 'n8n'
+              ? path.join(wtkDir, module, 'agents', `${agentName}.md`)
+              : path.join(wtkDir, 'modules', module, 'agents', `${agentName}.md`);
         if (await fs.pathExists(agentPath)) {
           return agentPath;
         }
@@ -526,7 +540,11 @@ class DependencyResolver {
         const fileName = name.endsWith('.md') ? name : `${name}.md`;
 
         const filePath =
-          module === 'core' ? path.join(wtkDir, 'core', type, fileName) : path.join(wtkDir, 'modules', module, type, fileName);
+          module === 'core'
+            ? path.join(wtkDir, 'core', type, fileName)
+            : module === 'bmm' || module === 'n8n'
+              ? path.join(wtkDir, module, type, fileName)
+              : path.join(wtkDir, 'modules', module, type, fileName);
         if (await fs.pathExists(filePath)) {
           return filePath;
         }
@@ -584,14 +602,23 @@ class DependencyResolver {
     const relative = path.relative(wtkDir, filePath);
     const parts = relative.split(path.sep);
 
-    // Handle source directory structure (src/core-skills, src/bmm-skills, or src/modules/xxx)
+    // Handle source directory structure (src/core-skills, src/bmm-skills, src/n8n-skills, or src/modules/xxx)
     if (parts[0] === 'src') {
-      if (parts[1] === 'core-skills') {
-        return 'core';
-      } else if (parts[1] === 'bmm-skills') {
-        return 'bmm';
-      } else if (parts[1] === 'modules' && parts.length > 2) {
-        return parts[2];
+      switch (parts[1]) {
+        case 'core-skills': {
+          return 'core';
+        }
+        case 'bmm-skills': {
+          return 'bmm';
+        }
+        case 'n8n-skills': {
+          return 'n8n';
+        }
+        default: {
+          if (parts[1] === 'modules' && parts.length > 2) {
+            return parts[2];
+          }
+        }
       }
     }
 
@@ -631,14 +658,29 @@ class DependencyResolver {
       let moduleBase;
 
       // Check if file is in source directory structure
-      if (file.includes('/src/core-skills/') || file.includes('/src/bmm-skills/')) {
-        if (module === 'core') {
-          moduleBase = path.join(wtkDir, 'src', 'core-skills');
-        } else if (module === 'bmm') {
-          moduleBase = path.join(wtkDir, 'src', 'bmm-skills');
+      if (file.includes('/src/core-skills/') || file.includes('/src/bmm-skills/') || file.includes('/src/n8n-skills/')) {
+        switch (module) {
+          case 'core': {
+            moduleBase = path.join(wtkDir, 'src', 'core-skills');
+            break;
+          }
+          case 'bmm': {
+            moduleBase = path.join(wtkDir, 'src', 'bmm-skills');
+            break;
+          }
+          case 'n8n': {
+            moduleBase = path.join(wtkDir, 'src', 'n8n-skills');
+            break;
+          }
+          // No default
         }
       } else {
-        moduleBase = module === 'core' ? path.join(wtkDir, 'core') : path.join(wtkDir, 'modules', module);
+        moduleBase =
+          module === 'core'
+            ? path.join(wtkDir, 'core')
+            : module === 'bmm' || module === 'n8n'
+              ? path.join(wtkDir, module)
+              : path.join(wtkDir, 'modules', module);
       }
 
       const relative = path.relative(moduleBase, file);

@@ -11,6 +11,27 @@ Wtk extends through official modules that you select during installation. These 
 Run `npx wtk-method install` and select the modules you want. The installer handles downloading, configuration, and IDE integration automatically.
 :::
 
+## Optional built-in: n8n (self-hosted)
+
+Skills for **self-hosted n8n** ship inside the WTK Method repository but are **not** installed by default. During installation, enable **WTK n8n (self-hosted)** in the module list (same pattern as BMM — optional, selectable).
+
+- **Code:** `n8n`
+- **Default:** off (`default_selected: false`) — opt in when you need n8n assistance
+- **Source:** built-in with the framework (no separate npm clone)
+
+**Skills (after install):**
+
+| Skill | Purpose |
+| --- | --- |
+| `wtk-n8n-master` | Discover instance via MCP (or checklist), write `n8n-environment-spec.md` |
+| `wtk-n8n-studio` | Session hub — routes to other n8n skills using the spec |
+| `wtk-n8n-workflows` | Workflow design, performance, reliability |
+| `wtk-n8n-integrations` | HTTP, webhooks, OAuth, credentials (types only) |
+| `wtk-n8n-operations` | Queue mode, workers, logs, metrics, hosting |
+| `wtk-n8n-dev-story` | Markdown workflow story before building in the editor |
+
+Outputs use paths from **core** config (e.g. `{output_folder}/n8n/...`). Core must remain installed.
+
 ## Wtk Builder
 
 Create custom agents, workflows, and domain-specific modules with guided assistance. Wtk Builder is the meta-module for extending the framework itself.

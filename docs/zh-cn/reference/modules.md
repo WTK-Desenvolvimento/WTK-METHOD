@@ -11,6 +11,18 @@ Wtk 通过您在安装期间选择的官方模块进行扩展。这些附加模�
 运行 `npx wtk-method install` 并选择您需要的模块。安装程序会自动处理下载、配置和 IDE 集成。
 :::
 
+## 可选内置：n8n（自建）
+
+用于**自建（self-hosted）n8n** 的技能随 WTK Method 仓库分发，但**默认不安装**。在安装程序的模块列表中勾选 **WTK n8n (self-hosted)**（与 BMM 类似，可选项）。
+
+- **代码：** `n8n`
+- **默认：** 关闭
+- **来源：** 框架内置（无需单独 npm 克隆）
+
+**安装后的技能：** `wtk-n8n-master`、`wtk-n8n-studio`、`wtk-n8n-workflows`、`wtk-n8n-integrations`、`wtk-n8n-operations`、`wtk-n8n-dev-story`。详细说明见[英文模块页中的对应章节](../../reference/modules.md#optional-built-in-n8n-self-hosted)。
+
+输出路径依赖**核心**配置（如 `{output_folder}`）。核心模块需保持安装。
+
 ## Wtk Builder
 
 在引导式协助下创建自定义智能体、工作流和特定领域的模块。Wtk Builder 是用于扩展框架本身的元模块。

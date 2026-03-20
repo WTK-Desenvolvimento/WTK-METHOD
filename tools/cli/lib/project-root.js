@@ -66,6 +66,9 @@ function getModulePath(moduleName, ...segments) {
   if (moduleName === 'bmm') {
     return getSourcePath('bmm-skills', ...segments);
   }
+  if (moduleName === 'n8n') {
+    return getSourcePath('n8n-skills', ...segments);
+  }
   return getSourcePath('modules', moduleName, ...segments);
 }
 
